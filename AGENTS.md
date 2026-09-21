@@ -101,6 +101,19 @@ docs/{en,ja}/            RFP + adr/
   The panel autosaves its size and re-anchors under the status item each open;
   focus-on-open = `AppController.focusToken` → `PanelView` `@FocusState`.
   `AppController.showPanel()` is also the Phase 2 hotkey entry point.
+- **The menu bar item is not shown pressed while the panel is open — a known
+  limitation, accepted to keep the resizable panel and the hotkey (user's decision,
+  2026-09-22).** The user saw it by hand on macOS 27; task-clock-gui, which has the
+  same panel, was filmed (the item's rect at 60 fps): lit while the mouse button is
+  held, dark from the release until the panel closes. macOS keeps an item lit during a
+  panel only for `NSPopover` and SwiftUI `MenuBarExtra`, through private AppKit
+  machinery; `button.highlight(true)` / `isHighlighted` never reach the screen, and the
+  private calls are not used (no behaviour guarantee — user policy). What each public
+  container would cost here: a popover has no user resizing, and whether its text field
+  takes typing right after a hotkey open from another app is unmeasured; a
+  `MenuBarExtra` window cannot be resized and, as far as is known (not verified), has no
+  public API to open it, so ⌥⌘T would lose its panel. Mechanism: knowledge macos-gui,
+  "メニューバー項目の『開いている間のハイライト』は器が決める".
 - **Global hotkey** — `GlobalHotKey` wraps Carbon `RegisterEventHotKey` (no external
   dep, no Accessibility). `AppController` registers `HotKeyCombo.current()` at launch
   and re-registers on `UserDefaults.didChangeNotification` when the combo changes.
