@@ -188,19 +188,47 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
 
     private func ensureSettingsWindow() -> NSWindow {
         if let settingsWindow { return settingsWindow }
-        // Fixed size — settings has a small, stable set of controls, so it doesn't
-        // need to be resizable.
+        // Not user-resizable: fixed width, and the height is fitted to the content
+        // (`fitSettingsWindow`).
         let w = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 440, height: 540),
             styleMask: [.titled, .closable],
             backing: .buffered, defer: false)
         w.title = "instant-translate Settings"
         w.isReleasedWhenClosed = false
-        let host = NSHostingView(rootView: SettingsView().environmentObject(languageCatalog))
+        let host = NSHostingView(rootView:
+            SettingsView(onContentHeight: { [weak self] height in
+                DispatchQueue.main.async { self?.fitSettingsWindow(contentHeight: height) }
+            })
+            .environmentObject(languageCatalog))
         host.autoresizingMask = [.width, .height]
-        w.contentView = host
+        // As for the panel (ADR-0003): the window is sized by us, so keep the hosting
+        // view out of window sizing — no size options, and not the `contentView`.
+        host.sizingOptions = []
+        let container = NSView(frame: NSRect(x: 0, y: 0, width: 440, height: 540))
+        host.frame = container.bounds
+        container.addSubview(host)
+        w.contentView = container
         settingsWindow = w
         return w
+    }
+
+    /// Fit the settings window's height to its content, keeping the top edge where
+    /// it is and never exceeding the screen (the content scrolls beyond that).
+    /// Called on the next run-loop turn, outside the layout pass that measured it.
+    private func fitSettingsWindow(contentHeight: CGFloat) {
+        guard let w = settingsWindow, contentHeight > 0 else { return }
+        var height = contentHeight.rounded(.up)
+        if let vis = (w.screen ?? NSScreen.main)?.visibleFrame {
+            height = min(height, vis.height - 40)
+        }
+        let content = w.contentRect(forFrameRect: w.frame)
+        guard abs(content.height - height) >= 1 else { return }
+        let fitted = w.frameRect(forContentRect: NSRect(x: 0, y: 0, width: content.width, height: height))
+        var frame = w.frame
+        frame.origin.y += frame.height - fitted.height   // keep the top edge
+        frame.size = fitted.size
+        w.setFrame(frame, display: true)
     }
 
     private func ensurePanel() -> NSPanel {

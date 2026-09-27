@@ -45,7 +45,7 @@ Sources/InstantTranslate/
   TextSize.swift         PURE ⌘+/⌘− ladder stepping + effective size (ADR-0002)
   PanelMinimumSize.swift PURE panel minimum from laid-out sizes (ADR-0003)
   PanelView.swift        the panel; owns the real TranslationSession via .translationTask
-  SettingsView.swift     settings Form (@AppStorage)
+  SettingsView.swift     settings content (@AppStorage); reports its height to fit the window
 Tests/InstantTranslateTests/
   LanguagePolicyTests, SettingsStoreTests, TranslationModelTests,
   TranslationFailureTests, TranslationStatusTests, SingleInstanceTests
@@ -253,7 +253,12 @@ docs/{en,ja}/            RFP + adr/
   `rotation3DEffect` inverts hit-test z-order so the flipped Back button wasn't
   clickable (only Esc worked). `Settings { EmptyView() }` is a placeholder only.
   If a flip is ever revisited: don't put interactive controls inside a statically
-  180°-rotated layer.
+  180°-rotated layer. The window's height is fitted to the content: `SettingsView`
+  reports its natural height (measured *inside* its scroll view, so resizing the
+  window can't feed back) and `AppController.fitSettingsWindow` applies it on the
+  next run-loop turn, keeping the top edge, capped to the screen. The hosting view
+  sits in a plain container with `sizingOptions = []`, for the same reason as the
+  panel's (ADR-0003).
 - **Notification clicks launch by bundle ID — enforce a single instance.**
   Clicking a banner makes notificationd open the app via LaunchServices,
   which resolves `jp.nlink.instant-translate` among *all* registered

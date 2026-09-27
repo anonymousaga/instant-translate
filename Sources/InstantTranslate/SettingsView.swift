@@ -4,9 +4,14 @@ import SwiftUI
 /// `SettingsStore` reads, via `@AppStorage`. Shown in a separate AppKit window
 /// (`AppController.openSettings`), which provides the title bar and close button.
 ///
-/// Robust to any window size: the content scrolls (never clips when short) and its
-/// width is capped (never stretches absurdly when wide).
+/// The window is sized to fit: the content reports its natural height through
+/// `onContentHeight`, and `AppController` fits the window to it — a fixed height left
+/// a blank band under the last group, and text length varies with the OS language.
+/// Should the content ever be taller than the screen, it scrolls; its width is capped.
 struct SettingsView: View {
+    /// Called with the content's natural height whenever it changes.
+    var onContentHeight: (CGFloat) -> Void = { _ in }
+
     @EnvironmentObject private var catalog: LanguageCatalog
     @AppStorage(SettingsKey.secondaryLanguage) private var secondaryLanguage = SettingsStore.systemDefaultSecondary()
     @AppStorage(SettingsKey.autoSwapEnabled) private var autoSwapEnabled = true
@@ -92,6 +97,9 @@ struct SettingsView: View {
             .padding(16)
             .frame(maxWidth: 480, alignment: .leading)   // don't stretch on a wide window
             .frame(maxWidth: .infinity)                   // …and center the capped content
+            // Inside the scroll view, so this is the content's own height, not the
+            // window's — fitting the window to it can't feed back into it.
+            .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { onContentHeight($0) }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear { launchAtLogin = LoginItem.isEnabled }   // reflect external changes

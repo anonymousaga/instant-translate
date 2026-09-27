@@ -23,6 +23,10 @@ Semantic Versioning.
 
 ### Fixed
 
+- The Settings window had a blank band under its last group: its height was a
+  fixed 540 pt. It now fits its content (measured, so it follows the OS
+  language's text lengths), keeping its top edge; it scrolls only if the
+  content is taller than the screen.
 - Clearing the input left the source picker's "(language)" hint — and the
   target routed from it — describing text that was no longer there. Emptying
   the input now forgets the detected language and re-routes the target; pins

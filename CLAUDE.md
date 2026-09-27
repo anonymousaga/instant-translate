@@ -63,7 +63,7 @@ programmatic Translation API and this app's deployment target are macOS 26.
 - `SourceTextView.swift` — the source input: an `NSTextView` (`NSViewRepresentable`) that surfaces IME composition state (`hasMarkedText`) and takes first responder on `focusToken`.
 - `AutoTranslatePolicy.swift` — **pure** rules for when a debounced auto-translation may be armed / may run (IME composition, undetectable language). Unit-tested.
 - `Version.swift` — `AppInfo.version` (`CFBundleShortVersionString`, `"dev"` outside a bundle); shown in the panel header + Settings footer, since there's no menu bar / About item.
-- `SettingsView.swift` — the settings window content (secondary language, auto-swap, auto-translate, clipboard, copy); shown in a fixed-size window (scrollable/width-capped as a safety net).
+- `SettingsView.swift` — the settings window content (secondary language, auto-swap, auto-translate, clipboard, copy); shown in a fixed-width window whose height is fitted to the content it reports (scrolls only past the screen height; width-capped).
 
 ## Gotchas / conventions
 
@@ -128,7 +128,9 @@ programmatic Translation API and this app's deployment target are macOS 26.
   container's 180° `rotation3DEffect` inverts hit-test z-order so the flipped Back
   button couldn't be clicked (only Esc worked). `allowsHitTesting` gating didn't fully
   fix it — a separate window is reliable and conventional. The `Settings { EmptyView() }`
-  scene is just the required placeholder.
+  scene is just the required placeholder. Its height is fitted to the content
+  (`fitSettingsWindow`, measured inside the scroll view), with the hosting view in a
+  plain container like the panel's (ADR-0003).
 - **No special permissions / no Accessibility** — selected-text translation was
   descoped, so the app needs no TCC grant (only the OS's language-model download
   consent). The global hotkey uses Carbon `RegisterEventHotKey` (no TCC). Don't add
