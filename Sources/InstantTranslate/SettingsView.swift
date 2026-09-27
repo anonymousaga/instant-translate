@@ -104,11 +104,17 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 // Settings is where people habitually look for a version number.
-                Text("nlink-jp instant-translate \(AppInfo.version)")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .center)
+                VStack(spacing: 2) {
+                    Text("nlink-jp instant-translate \(AppInfo.version)")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .textSelection(.enabled)
+                    Text("Fork by anonymousaga")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .textSelection(.enabled)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
             }
             .padding(16)
             .frame(maxWidth: 480, alignment: .leading)   // don't stretch on a wide window
