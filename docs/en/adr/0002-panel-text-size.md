@@ -50,10 +50,17 @@ Settings gets **no slider**. It gets one line of help text naming the three
 shortcuts (the only in-app place a user can learn them), and the README
 documents them.
 
-The shortcuts are attached in `PanelView` with `.keyboardShortcut`, the same
-mechanism the panel already uses for ⌘↩ (Translate). Whether it fires while the
-app is *inactive* (the usual state of this `.nonactivatingPanel`) has not been
-checked for either shortcut — open question 1.
+The shortcuts are attached in `PanelView` with `.keyboardShortcut` on invisible
+buttons, the same mechanism the panel already uses for ⌘↩ (Translate). A
+shortcut matches its modifiers **exactly**, so enlarge is bound three times:
+
+| Binding | What produces it |
+|---------|------------------|
+| `"+"` + ⌘⇧ | the main-row `+`, shifted on both US (`=` key) and JIS (`;` key) layouts; also Shift + keypad `+` |
+| `"+"` + ⌘ | the keypad `+`, which arrives unshifted |
+| `"="` + ⌘ | ⌘= on a US layout — the unshifted alias browsers accept |
+
+⌘− (main row or keypad) and ⌘0 need one binding each.
 
 ### Decision 2: What scales
 
@@ -97,25 +104,49 @@ per-text and volatile by design, this is a per-person preference.
   control, one new help line in Settings.
 - Controls never grow, so the panel can't overflow horizontally at large sizes.
 - At 28 pt the input and output keep their 80 pt minimum heights — about two
-  lines each. Whether that is acceptable, or the minimums should scale, is an
-  open question below; it is decided by looking at it, not in advance.
+  lines each. Whether that is acceptable, or the minimums should scale, is
+  decided by looking at it, not in advance — see result 2 below.
 - The default for users who never press the keys is unchanged (system body
   size). PR #1's slider would have moved everyone from 13 pt to 14 pt.
 - One new UserDefaults key; `SettingsKey.registerDefaults()` does not register
   it (absence is the meaning).
 
-## Open questions (measured in the prototype, then recorded here)
+## Results of the open questions (prototype, 2026-09-27)
 
-1. **Key arrival per layout.** Which of ⌘+, ⌘⇧=, ⌘= (US) and ⌘+, ⌘; (JIS)
-   trigger the enlarge action with `.keyboardShortcut("+")`; whether an extra
-   ⌘= binding is needed. Check each with the app active *and* inactive (panel
-   opened by hotkey from another app). Record the observed matrix.
-2. **Minimum heights at 28 pt.** Look at the panel at its minimum size with
-   the largest text. Decide then whether the 80 pt minimums scale.
-3. **IME composition.** Pressing ⌘+ while a kana-kanji conversion is open must
-   not commit, cancel or corrupt the marked text.
-4. **Output selection and caret.** Changing the size must keep the input's
-   caret and selection and the output's scroll position sensible.
+Measured by the maintainer by hand on a JIS-arranged keyboard with the
+Kawasemi input method, in both its Japanese and Roman modes, with a temporary
+build that logged every ⌘ key event (`keyCode`, characters, modifiers, whether
+the panel handled it). An earlier automated probe was discarded: it posted US
+virtual key codes, which on this layout are different keys (key code 24 is `^`
+on JIS, not `=`), so it never sent `+` or `=` at all.
+
+1. **Key arrival.**
+
+   | Key pressed | Arrives as | Handled |
+   |-------------|------------|---------|
+   | ⌘ + main-row `+` (Shift-`;`, key code 41) | `"+"`, ⌘⇧ | yes |
+   | ⌘ + keypad `+` (key code 69) | `"+"`, ⌘ | only after adding the `"+"` + ⌘ binding |
+   | ⌘ + Shift + keypad `+` | `"+"`, ⌘⇧ | yes |
+   | ⌘ + main-row `-` (key code 27) / keypad `-` (78) | `"-"`, ⌘ | yes |
+   | ⌘ + keypad `0` (key code 82) | `"0"`, ⌘ | yes |
+
+   Identical in the Japanese and Roman modes. An unhandled ⌘ key ends in the
+   text view and beeps — that is how the missing keypad binding showed itself.
+   **Not measured:** a US layout (⌘⇧= and ⌘=), and the app *inactive* — in
+   every trial the panel's hotkey open left the app active.
+2. **Minimum size.** Shrinking the panel to its minimum broke the layout —
+   but at the default 13 pt as well: the fixed-width language pickers fill the
+   row, the "(…)" hint wraps one character per line, the Translate button is
+   squeezed to a sliver and the Copy / Quit row is pushed out. The picker row
+   ignores the text size, so this is a pre-existing bug of the panel's minimum
+   size (320 × 320 pt), fixed separately. The 80 pt field minimums are
+   re-checked at 28 pt after that fix.
+3. **IME composition.** ⌘+ during a kana-kanji conversion leaves the marked
+   text untouched; the new size is applied once the conversion is committed
+   (the size change waits for `hasMarkedText()` to clear, like the text
+   rewrite in `SourceTextView.updateNSView`).
+4. **Caret.** The caret stayed in place across size changes. The output's
+   scroll position with a long translation was not specifically checked.
 
 ## Alternatives considered
 
@@ -140,8 +171,8 @@ panel (⌘↩).
 
 **A6. A local `keyDown` monitor matching characters.** Works regardless of
 view state, but bypasses the system's keyboard-layout remapping and means
-hand-matching characters per layout. Kept in reserve only if open question 1
-shows `.keyboardShortcut` cannot be made to fire on a common layout.
+hand-matching characters per layout. Not needed: result 1 shows
+`.keyboardShortcut` fires on a JIS layout once each arriving form is bound.
 
 ## References
 

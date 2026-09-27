@@ -6,6 +6,16 @@ Semantic Versioning.
 
 ## [Unreleased]
 
+### Added
+
+- Text size for the panel: ⌘+ / ⌘− make the input and translation text bigger
+  or smaller through a fixed ladder (10–28 pt, widening as it grows), and ⌘0
+  returns to the system body size. The keypad + / − work too. Only the text
+  scales; controls keep their sizes. The choice persists across launches.
+  Settings names the shortcuts, since the app has no menu bar. ADR-0002.
+  Suggested by @anonymousaga in #1 (as a Settings slider; shipped as the
+  standard macOS shortcuts instead).
+
 ### Fixed
 
 - The release zip no longer carries AppleDouble (`._*`) entries: the app is

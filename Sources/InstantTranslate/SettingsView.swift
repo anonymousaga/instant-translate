@@ -63,6 +63,12 @@ struct SettingsView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
+                        // The panel's text-size keys have no menu to be found in, so
+                        // this line is the only place in the app that names them (ADR-0002).
+                        Text("In the panel, ⌘+ / ⌘− / ⌘0 make the text bigger, smaller, or back to normal.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }

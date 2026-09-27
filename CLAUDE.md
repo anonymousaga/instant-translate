@@ -57,6 +57,7 @@ programmatic Translation API and this app's deployment target are macOS 26.
 - `Languages.swift` — curated fallback language list + localized names for the pickers.
 - `LanguageCatalog.swift` — async load of OS-supported languages (`LanguageAvailability`) → `[LanguageOption]` (region-qualified when a base has >1 variant); pickers bind to it.
 - `TextTranslating.swift` — protocol + `EchoTranslator` stub (tests/previews).
+- `TextSize.swift` — **pure** ⌘+ / ⌘− ladder stepping and the effective size (stored preference, else system body size, clamped). Unit-tested. ADR-0002.
 - `PanelView.swift` — the translation panel; owns the real `TranslationSession` via `.translationTask`; fills the panel; focus-on-open; debounced auto-translate. Gear → `openSettings`.
 - `SourceTextView.swift` — the source input: an `NSTextView` (`NSViewRepresentable`) that surfaces IME composition state (`hasMarkedText`) and takes first responder on `focusToken`.
 - `AutoTranslatePolicy.swift` — **pure** rules for when a debounced auto-translation may be armed / may run (IME composition, undetectable language). Unit-tested.
@@ -71,6 +72,10 @@ programmatic Translation API and this app's deployment target are macOS 26.
   new `Configuration`. For closed-panel paths (hotkey / selected text, Phase 2) a
   hidden host view must stay resident.
 - **History is volatile** — only the most-recent entry, in memory, never persisted.
+- **Text-size shortcuts are bound per arriving form** — `.keyboardShortcut` matches
+  modifiers exactly, so enlarge needs `"+"`+⌘⇧ (main-row `+`), `"+"`+⌘ (keypad) and
+  `"="`+⌘ (US). A missing binding makes that key beep. `SettingsKey.textSize` stays
+  unregistered (absent = system size; ⌘0 deletes it). ADR-0002.
 - **Settings persist, history doesn't**: `SettingsStore` reads `UserDefaults`;
   `SettingsView` binds the same keys via `@AppStorage`.
 - **Signing**: pure SwiftUI/AppKit → no entitlements, Hardened Runtime alone.

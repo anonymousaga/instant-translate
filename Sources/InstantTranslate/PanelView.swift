@@ -17,6 +17,8 @@ struct PanelView: View {
     @EnvironmentObject private var controller: AppController
     @EnvironmentObject private var catalog: LanguageCatalog
     @AppStorage(SettingsKey.autoTranslate) private var autoTranslate = true
+    /// ⌘+ / ⌘− preference; nil = system body size (ADR-0002).
+    @AppStorage(SettingsKey.textSize) private var textSizePreference: Double?
     @State private var configuration: TranslationSession.Configuration?
     @State private var debounceTask: Task<Void, Never>?
 
@@ -53,14 +55,15 @@ struct PanelView: View {
 
             SourceTextView(text: $model.sourceText,
                            isComposing: $model.isComposing,
-                           focusToken: controller.focusToken)
+                           focusToken: controller.focusToken,
+                           fontSize: textSize)
                 .frame(minHeight: 80, maxHeight: .infinity)
                 .overlay(alignment: .topLeading) {
                     // A caret alone in an empty field is easy to miss; the prompt makes
                     // it unmistakable that the panel is ready for input.
                     if isSourceEmpty {
                         Text("Type or paste text to translate")
-                            .font(.body)
+                            .font(.system(size: textSize))
                             .foregroundStyle(.tertiary)
                             .padding(.leading, 8)
                             .padding(.top, 6)
@@ -117,6 +120,7 @@ struct PanelView: View {
 
             ScrollView {
                 Text(model.translatedText.isEmpty ? "—" : model.translatedText)
+                    .font(.system(size: textSize))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .textSelection(.enabled)
                     .foregroundStyle(model.translatedText.isEmpty ? .secondary : .primary)
@@ -137,6 +141,7 @@ struct PanelView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background { textSizeShortcuts }
         .onChange(of: model.sourceText) { _, newValue in scheduleAutoTranslate(newValue) }
         .onChange(of: model.isComposing) { _, composing in
             // A committed composition often leaves the text unchanged (the marked run
@@ -162,6 +167,43 @@ struct PanelView: View {
         .translationTask(configuration) { session in
             await run(session)
         }
+    }
+
+    // MARK: - Text size (ADR-0002)
+
+    /// The content text size: the ⌘+ / ⌘− preference, else the system body size.
+    private var textSize: Double {
+        TextSize.effective(preference: textSizePreference,
+                           body: NSFont.preferredFont(forTextStyle: .body).pointSize)
+    }
+
+    /// ⌘+ / ⌘− / ⌘0. Invisible buttons carry the shortcuts — the same
+    /// `.keyboardShortcut` mechanism as ⌘↩ — since this app has no menu bar to hold
+    /// them. Only the content text scales; controls keep their sizes.
+    private var textSizeShortcuts: some View {
+        ZStack {
+            // A shortcut matches its modifiers exactly, so "+" is bound twice: the
+            // main-row "+" is shifted on both US ("=" key) and JIS (";" key) and
+            // arrives as ⌘⇧+, while the keypad "+" arrives as ⌘+ with no Shift.
+            // ⌘= is the unshifted alias browsers also accept on a US layout.
+            Button("Bigger") { stepTextSize(.larger) }
+                .keyboardShortcut("+", modifiers: [.command, .shift])
+            Button("Bigger") { stepTextSize(.larger) }
+                .keyboardShortcut("+", modifiers: .command)
+            Button("Bigger") { stepTextSize(.larger) }
+                .keyboardShortcut("=", modifiers: .command)
+            Button("Smaller") { stepTextSize(.smaller) }
+                .keyboardShortcut("-", modifiers: .command)
+            Button("Actual Size") { textSizePreference = nil }
+                .keyboardShortcut("0", modifiers: .command)
+        }
+        .opacity(0)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func stepTextSize(_ step: TextSize.Step) {
+        if let next = TextSize.next(from: textSize, step) { textSizePreference = next }
     }
 
     // MARK: - Status & failure

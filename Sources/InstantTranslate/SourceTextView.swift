@@ -23,13 +23,18 @@ struct SourceTextView: NSViewRepresentable {
     /// Bumped by `AppController` whenever the panel opens; each new value re-focuses
     /// the text view (a plain `Bool` can't re-trigger focus when it's already `true`).
     var focusToken: Int
+    /// Point size of the text (`TextSize`, ⌘+ / ⌘− / ⌘0 in the panel).
+    var fontSize: CGFloat
+
+    /// The body font at the chosen size — same face as before, only the size varies.
+    private var font: NSFont { NSFont.preferredFont(forTextStyle: .body).withSize(fontSize) }
 
     func makeNSView(context: Context) -> NSScrollView {
         let scroll = NSScrollView()
         let tv = ComposingTextView()
         tv.delegate = context.coordinator
         tv.string = text
-        tv.font = .preferredFont(forTextStyle: .body)
+        tv.font = font
         tv.isRichText = false
         tv.isEditable = true
         tv.isSelectable = true
@@ -69,6 +74,13 @@ struct SourceTextView: NSViewRepresentable {
             tv.string = text
             // Externally-set text (e.g. clipboard seeding) leaves the caret at the end.
             tv.setSelectedRange(NSRange(location: (text as NSString).length, length: 0))
+        }
+
+        // Resizing restyles the whole string, so it waits for a composition to end,
+        // like the text rewrite above. Ending one re-renders this view (via
+        // `isComposing`), which applies the pending size.
+        if !tv.hasMarkedText(), tv.font?.pointSize != fontSize {
+            tv.font = font
         }
 
         if context.coordinator.appliedFocusToken != focusToken {

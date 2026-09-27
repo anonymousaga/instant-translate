@@ -29,6 +29,10 @@ and light. macOS 26+ (Apple silicon). Signed with Developer ID and notarized.
   you know what you're pasting. Resets to Auto on restart.
 - **Manual target**: a picker in the panel lets you temporarily send the translation
   to a specific language instead of Auto (resets to Auto on restart).
+- **Text size**: in the panel, **⌘+** / **⌘−** make the input and translation text
+  bigger or smaller, and **⌘0** returns to the system size (the keypad **+** / **−**
+  work too). Only the text grows — controls keep their sizes — and the size is
+  remembered across launches.
 - **Global hotkey**: press **⌥⌘T** (rebindable in Settings) to open the panel from
   anywhere. On open it can seed the source from your clipboard and translate it.
 - **Only OS-supported languages**: the pickers list exactly the languages your Mac's

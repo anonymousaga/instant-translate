@@ -42,6 +42,7 @@ Sources/InstantTranslate/
   TranslationFailure.swift  classify(Error) → named failure; PURE message(sourceName:targetName:)
   TranslationStatus.swift   TranslationPhase + PURE display() → status-row symbol/text/spinner/tone
   TextTranslating.swift  protocol + EchoTranslator stub (tests/previews)
+  TextSize.swift         PURE ⌘+/⌘− ladder stepping + effective size (ADR-0002)
   PanelView.swift        the panel; owns the real TranslationSession via .translationTask
   SettingsView.swift     settings Form (@AppStorage)
 Tests/InstantTranslateTests/
@@ -92,6 +93,17 @@ docs/{en,ja}/            RFP + adr/
   .translating`. Setting a phase is the only way to move the UI; there is no second
   source of truth to drift.
 - **History is volatile** — most-recent entry only, in memory, never persisted.
+- **Text size is ⌘+ / ⌘− / ⌘0 on invisible buttons in `PanelView`** (ADR-0002) —
+  there is no menu bar to hold them. `.keyboardShortcut` matches modifiers
+  *exactly*, so enlarge is bound three times: `"+"`+⌘⇧ (main-row `+`, shifted on
+  US and JIS), `"+"`+⌘ (keypad `+`, unshifted) and `"="`+⌘ (US alias). Dropping
+  one silently breaks that key — it falls through to the text view and beeps.
+  Only the input, its placeholder and the output scale. `SettingsKey.textSize`
+  is deliberately *not* registered: absence means the system body size, and ⌘0
+  removes it. `SourceTextView` defers a font change while IME text is marked.
+  When testing shortcuts with synthetic `CGEvent`s, remember key codes are
+  positions: US code 24 (`=`) is `^` on JIS — the first automated probe sent
+  neither `+` nor `=`.
 - **Settings persist via UserDefaults** — `SettingsStore` reads; `SettingsView`
   binds the same keys via `@AppStorage`. `SettingsKey.registerDefaults()` runs at
   launch in `App.init`.
