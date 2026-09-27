@@ -253,16 +253,23 @@ struct PanelView: View {
             // main-row "+" is shifted on both US ("=" key) and JIS (";" key) and
             // arrives as ⌘⇧+, while the keypad "+" arrives as ⌘+ with no Shift.
             // ⌘= is the unshifted alias browsers also accept on a US layout.
+            // `.focusable(false)`: invisible, so Tab (with Full Keyboard Access) must
+            // not land on them either — only the shortcuts reach them.
             Button("Bigger") { stepTextSize(.larger) }
                 .keyboardShortcut("+", modifiers: [.command, .shift])
+                .focusable(false)
             Button("Bigger") { stepTextSize(.larger) }
                 .keyboardShortcut("+", modifiers: .command)
+                .focusable(false)
             Button("Bigger") { stepTextSize(.larger) }
                 .keyboardShortcut("=", modifiers: .command)
+                .focusable(false)
             Button("Smaller") { stepTextSize(.smaller) }
                 .keyboardShortcut("-", modifiers: .command)
+                .focusable(false)
             Button("Actual Size") { textSizePreference = nil }
                 .keyboardShortcut("0", modifiers: .command)
+                .focusable(false)
         }
         .opacity(0)
         .allowsHitTesting(false)

@@ -32,6 +32,9 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
     private var statusItem: NSStatusItem?
     private var panel: NSPanel?
     private var settingsWindow: NSWindow?
+    /// Set when the settings window is created: its first height fit re-centres it,
+    /// since `openSettings` centred it at the placeholder height.
+    private var settingsNeedsCentering = false
     private var hotKey: GlobalHotKey?
     private var currentCombo: HotKeyCombo?
     private var lastShownAt = Date.distantPast
@@ -166,6 +169,9 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
         var frame = p.frame
         frame.origin.y -= grown.height - frame.height
         frame.size = grown.size
+        if let vis = (p.screen ?? NSScreen.main)?.visibleFrame {
+            frame = WindowPlacement.clamped(frame, into: vis)
+        }
         p.setFrame(frame, display: true)
     }
 
@@ -210,6 +216,7 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
         container.addSubview(host)
         w.contentView = container
         settingsWindow = w
+        settingsNeedsCentering = true
         return w
     }
 
@@ -223,12 +230,18 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
             height = min(height, vis.height - 40)
         }
         let content = w.contentRect(forFrameRect: w.frame)
+        let recentre = settingsNeedsCentering
+        settingsNeedsCentering = false
         guard abs(content.height - height) >= 1 else { return }
         let fitted = w.frameRect(forContentRect: NSRect(x: 0, y: 0, width: content.width, height: height))
         var frame = w.frame
         frame.origin.y += frame.height - fitted.height   // keep the top edge
         frame.size = fitted.size
+        if let vis = (w.screen ?? NSScreen.main)?.visibleFrame {
+            frame = WindowPlacement.clamped(frame, into: vis)
+        }
         w.setFrame(frame, display: true)
+        if recentre { w.center() }
     }
 
     private func ensurePanel() -> NSPanel {

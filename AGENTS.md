@@ -42,16 +42,22 @@ Sources/InstantTranslate/
   TranslationFailure.swift  classify(Error) → named failure; PURE message(sourceName:targetName:)
   TranslationStatus.swift   TranslationPhase + PURE display() → status-row symbol/text/spinner/tone
   TextTranslating.swift  protocol + EchoTranslator stub (tests/previews)
+  AutoTranslatePolicy.swift  PURE when a debounced auto-translation may arm / run (IME, undetectable input)
+  SourceTextView.swift   the input: NSTextView wrapper exposing IME composition + focus
+  Version.swift          AppInfo.version (CFBundleShortVersionString, "dev" outside a bundle)
   TextSize.swift         PURE ⌘+/⌘− ladder stepping + effective size (ADR-0002)
   PanelMinimumSize.swift PURE panel minimum from laid-out sizes (ADR-0003)
+  WindowPlacement.swift  PURE clamp of a code-resized window back onto the screen
   PanelView.swift        the panel; owns the real TranslationSession via .translationTask
   SettingsView.swift     settings content (@AppStorage); reports its height to fit the window
 Tests/InstantTranslateTests/
-  LanguagePolicyTests, SettingsStoreTests, TranslationModelTests,
-  TranslationFailureTests, TranslationStatusTests, SingleInstanceTests
+  one <Type>Tests.swift per unit: AppInfo, AutoTranslatePolicy, HotKeyCombo,
+  LanguageCatalog, LanguageDetector, LanguagePolicy, PanelMinimumSize,
+  SettingsStore, SingleInstance, TextSize, TranslationFailure, TranslationModel,
+  TranslationPanel, TranslationStatus, WindowPlacement
 Info.plist               LSUIElement=true, LSMinimumSystemVersion=26.0
 scripts/                 codesign / notarize / make-icns / gen-brew / release-brew.mk / cask.rb.tmpl
-assets/                  AppIcon-1024.png (→ AppIcon.icns at build; absent for now)
+assets/                  AppIcon-1024.png (→ AppIcon.icns at build)
 docs/{en,ja}/            RFP + adr/
 ```
 
