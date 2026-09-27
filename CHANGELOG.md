@@ -6,6 +6,8 @@ Semantic Versioning.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-09-28
+
 ### Fixed
 
 - Short input in your own languages was often detected as a neighbouring
