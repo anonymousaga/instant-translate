@@ -255,13 +255,17 @@ docs/{en,ja}/            RFP + adr/
   last resort there). Note the config rebuild check compares source *and* target.
 - **Detection runs with a prior for the user's own languages** (ADR-0004) —
   `LanguageDetector.hints(preferred:)` gives every language in `knownLanguages` 1 and
-  the local + secondary languages `ownLanguageWeight` (20). Measured limits: larger
-  weights took Chinese sentences for Japanese and Danish for Norwegian. **Never hint
-  only the preferred languages** — languages left out of the hints behave as prior 0
-  (measured: it acts as a restriction). `knownLanguages` must hold every language the
-  recognizer can return; `testEveryLanguageTheRecognizerReturnsIsKnown` checks it. The
-  behaviour tests depend on Apple's model: after an OS update, re-measure rather than
-  edit expectations. Input that is still misdetected is what the source picker is for —
+  the local + secondary languages `ownLanguageWeight` (20) — **except Japanese and
+  Chinese** (`hanScriptLanguages`): they share the script, so any weight on one
+  swallows the other (measured from 5 up, both ways); their collision stays the
+  `resolve` tie-break's job. Measure changes through the whole pipeline (hints, then
+  `resolve`) — measuring the prior alone understated the effect. **Never hint only the
+  preferred languages** — languages left out behave as prior 0 (measured: it acts as a
+  restriction), and a language missing from `knownLanguages` loses to neighbours that
+  share its script. `testEveryLanguageTheRecognizerReturnsIsKnown` is a tripwire over a
+  sample (it found `iu-Cans`, which has no documented constant), not a completeness
+  proof. The behaviour tests depend on Apple's model: after an OS update, re-measure
+  rather than edit expectations. Input that is still misdetected is what the source picker is for —
   no restriction setting (reporter's proposal, rejected in the ADR).
 - **Settings is a separate AppKit `NSWindow`** (`AppController.openSettings`), not the
   SwiftUI `Settings` scene / `showSettingsWindow:` (unreliable for a menu-only

@@ -95,10 +95,13 @@ final class LanguageDetectorTests: XCTestCase {
                        "every other language keeps a prior — leaving one out makes it undetectable")
     }
 
-    func testChineseCoversBothScripts() {
-        let hints = LanguageDetector.hints(preferred: ["zh"])
-        XCTAssertEqual(hints[.simplifiedChinese], LanguageDetector.ownLanguageWeight)
-        XCTAssertEqual(hints[.traditionalChinese], LanguageDetector.ownLanguageWeight)
+    func testHanScriptLanguagesAreNeverWeighted() {
+        // Japanese and Chinese share the script; weighting either swallows the other.
+        let hints = LanguageDetector.hints(preferred: ["ja", "zh", "en"])
+        XCTAssertEqual(hints[.japanese], 1)
+        XCTAssertEqual(hints[.simplifiedChinese], 1)
+        XCTAssertEqual(hints[.traditionalChinese], 1)
+        XCTAssertEqual(hints[.english], LanguageDetector.ownLanguageWeight)
     }
 
     func testRegionalAndUnknownCodesAreMatchedByBase() {
@@ -123,6 +126,7 @@ final class LanguageDetectorTests: XCTestCase {
             "ಧನ್ಯವಾದಗಳು", "നന്ദി", "ਧੰਨਵਾਦ", "આભાર", "ଧନ୍ୟବାଦ", "ශ්‍රී ලංකාව", "สวัสดีครับ", "ສະບາຍດີ",
             "សួស្តី", "မင်္ဂလာပါ", "გამარჯობა", "Բարև ձեզ", "ሰላም", "Сайн байна уу", "Сәлеметсіз бе",
             "ᏌᏊ ᎢᏳᎾᎵᏍᏔᏅ", "བཀྲ་ཤིས་བདེ་ལེགས།", "Takk fyrir hjálpina.", "Terima kasih, apa khabar?",
+            "ᐊᕐᓇᐅᔪᖅ ᐅᖃᐅᓯᖅ",
         ]
         let known = Set(LanguageDetector.knownLanguages)
         var unknown: Set<String> = []
@@ -142,16 +146,23 @@ final class LanguageDetectorTests: XCTestCase {
     // re-measure the weight (ADR-0004's table) — do not just edit the expectation.
 
     func testShortEnglishIsEnglishForAnEnglishAndKoreanUser() {
-        // From issue #2: without the prior these came out Catalan, Swedish and Dutch.
-        for text in ["im a cat", "under", "begin"] {
+        // From issue #2: without the prior these came out Catalan, Polish, Swedish and Dutch.
+        for text in ["im a cat", "im odd", "under", "begin"] {
             XCTAssertEqual(LanguageDetector.detect(text, preferred: ["en", "ko"]), "en", text)
         }
     }
 
     func testChineseSentencesStayChineseForAJapaneseUser() {
         // The regression a larger weight caused: these read as Japanese at 50 and above.
-        for text in ["我们明天去北京", "我不知道他在哪里"] {
+        for text in ["我们明天去北京", "我不知道他在哪里", "人工智能研究所"] {
             XCTAssertEqual(LanguageDetector.detect(text, preferred: ["ja", "en"]), "zh", text)
+        }
+    }
+
+    func testKanjiOnlyJapaneseStaysJapaneseForAChineseUser() {
+        // The mirror regression: with Chinese weighted these read as Chinese.
+        for text in ["東京都新宿区西新宿二丁目八番一号", "日本国憲法", "株式会社", "明日会議"] {
+            XCTAssertEqual(LanguageDetector.detect(text, preferred: ["zh", "en"]), "ja", text)
         }
     }
 

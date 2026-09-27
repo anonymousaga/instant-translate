@@ -13,15 +13,24 @@ enum LanguageDetector {
     static let ambiguityRatio = 0.5
 
     /// Weight of the user's own languages in the detection prior (ADR-0004). Measured
-    /// on macOS 27.0: 20 fixes most short input in the user's languages ("under",
-    /// "begin", "im a cat" for English + Korean); 50 and above started taking Chinese
-    /// sentences for Japanese and Danish for Norwegian.
+    /// on macOS 27.0 through the whole pipeline (prior, then `resolve`): 20 fixes most
+    /// short input in the user's languages ("under", "begin", "im a cat", "im odd" for
+    /// English + Korean); 50 took Danish for Norwegian.
     static let ownLanguageWeight = 20.0
 
-    /// Every language `NLLanguageRecognizer` documents, `undetermined` aside. A language
-    /// missing here gets no prior at all and is never detected — hints act on the
-    /// listed languages only — so a test checks this list against what the recognizer
-    /// actually returns.
+    /// Languages written in Han characters. They never get the prior: Japanese and
+    /// Chinese share the script, so weighting either swallows the other from the
+    /// smallest weight measured (kanji-only Japanese read as Chinese for a Chinese
+    /// user, a Chinese sentence as Japanese for a Japanese user). That collision is
+    /// the `resolve` tie-break's job, as it was before the prior (ADR-0004).
+    static let hanScriptLanguages: Set<String> = ["ja", "zh"]
+
+    /// Every language `NLLanguageRecognizer` documents, `undetermined` aside, plus one it
+    /// was seen to return without a documented constant (`iu-Cans`). A language missing
+    /// here gets no prior — hints act on the listed languages only — and loses to any
+    /// neighbour sharing its script (a language with a script of its own is still
+    /// detected). A test checks the list against what the recognizer returns for a
+    /// multilingual sample: a tripwire, not a proof of completeness.
     static let knownLanguages: [NLLanguage] = [
         .amharic, .arabic, .armenian, .bengali, .bulgarian, .burmese, .catalan, .cherokee,
         .croatian, .czech, .danish, .dutch, .english, .finnish, .french, .georgian, .german,
@@ -30,14 +39,15 @@ enum LanguageDetector {
         .mongolian, .norwegian, .oriya, .persian, .polish, .portuguese, .punjabi, .romanian,
         .russian, .simplifiedChinese, .sinhalese, .slovak, .spanish, .swedish, .tamil,
         .telugu, .thai, .tibetan, .traditionalChinese, .turkish, .ukrainian, .urdu, .vietnamese,
+        NLLanguage(rawValue: "iu-Cans"),
     ]
 
     /// The detection prior (ADR-0004): every known language at 1, the user's own
-    /// languages — matched by base subtag, so `zh` covers both scripts and `en-GB`
-    /// means English — at `ownLanguageWeight`. Hinting only the own languages would
-    /// act as a restriction (measured): everything else would stop being detected.
+    /// languages — matched by base subtag, so `en-GB` means English — at
+    /// `ownLanguageWeight`, except `hanScriptLanguages`. Hinting only the own languages
+    /// would act as a restriction (measured): everything else would stop being detected.
     static func hints(preferred: [String]) -> [NLLanguage: Double] {
-        let own = Set(preferred.map(LanguagePolicy.base))
+        let own = Set(preferred.map(LanguagePolicy.base)).subtracting(hanScriptLanguages)
         var hints: [NLLanguage: Double] = [:]
         for language in knownLanguages {
             hints[language] = own.contains(LanguagePolicy.base(language.rawValue)) ? ownLanguageWeight : 1

@@ -12,7 +12,9 @@ Semantic Versioning.
   language — "under" as Swedish, "begin" as Dutch, "im a cat" as Catalan for an
   English + Korean user. Detection now weighs your system and secondary
   languages as more likely (a prior over every language the recognizer knows,
-  so other languages stay detectable). Some very short input can still be
+  so other languages stay detectable). Japanese and Chinese are left out of
+  it: they share characters, and the existing tie-break already separates
+  them, so their detection is unchanged. Some very short input can still be
   guessed wrong; pin the input language with the source picker. ADR-0004.
   Reported by @anonymousaga in #2.
 
