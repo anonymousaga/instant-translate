@@ -59,7 +59,9 @@ struct SettingsView: View {
                             Spacer()
                             HotKeyRecorder(combo: hotKeyBinding)
                         }
-                        Text("Press this shortcut anywhere to open instant-translate.")
+                        Text(hotKeyBinding.wrappedValue.isValid
+                             ? "Press this shortcut anywhere to open instant-translate."
+                             : "No shortcut — open instant-translate from its menu bar icon.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)

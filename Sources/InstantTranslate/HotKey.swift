@@ -15,6 +15,13 @@ struct HotKeyCombo: Equatable {
         keyCode: UInt16(kVK_ANSI_T),
         modifiers: NSEvent.ModifierFlags([.command, .option]).rawValue)
 
+    /// No shortcut: the user removed it (the × next to the recorder). Persisted like
+    /// any combo — removing the defaults instead would bring back ⌥⌘T. Recorded
+    /// combos always carry a modifier, so no modifiers at all can't be mistaken for
+    /// one, and `GlobalHotKey.register` skips it as invalid.
+    /// (Not named `none`: that reads as `Optional.none` wherever a combo is optional.)
+    static let disabled = HotKeyCombo(keyCode: 0, modifiers: 0)
+
     var flags: NSEvent.ModifierFlags { NSEvent.ModifierFlags(rawValue: modifiers) }
 
     /// Carbon modifier mask for `RegisterEventHotKey`.
@@ -31,6 +38,10 @@ struct HotKeyCombo: Equatable {
     var isValid: Bool {
         !flags.intersection([.command, .option, .control]).isEmpty
     }
+
+    /// What the recorder shows: the combo, or "None" when nothing is registered —
+    /// the user removed it, or a stored value is unusable.
+    var label: String { isValid ? displayString : "None" }
 
     /// Menu-style rendering, e.g. "⌥⌘T" (modifier order matches macOS: ⌃⌥⇧⌘).
     var displayString: String {

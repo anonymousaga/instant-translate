@@ -8,6 +8,11 @@ Semantic Versioning.
 
 ### Added
 
+- The global shortcut can be removed: an × beside the recorder in Settings
+  clears it, and the choice survives a restart (it does not fall back to ⌥⌘T).
+  The panel then opens from the menu bar icon; record a new shortcut to bring
+  it back. Requested by @anonymousaga in #1 (as clearing after a 4-second wait
+  while recording; shipped as an explicit button instead).
 - Text size for the panel: ⌘+ / ⌘− make the input and translation text bigger
   or smaller through a fixed ladder (10–28 pt, widening as it grows), and ⌘0
   returns to the system body size. The keypad + / − work too. Only the text

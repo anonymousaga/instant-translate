@@ -36,7 +36,7 @@ Sources/InstantTranslate/
   Languages.swift        curated fallback language list + localized name
   LanguageCatalog.swift  async OS-supported languages → LanguageOption list (region-qualified when needed)
   HotKey.swift           HotKeyCombo (persist/display/Carbon) + GlobalHotKey (RegisterEventHotKey)
-  HotKeyRecorder.swift   click-to-record shortcut control (local keyDown monitor)
+  HotKeyRecorder.swift   click-to-record shortcut control (local keyDown monitor) + × to remove
   SettingsStore.swift    UserDefaults keys/defaults + snapshot; builds LanguagePolicy
   TranslationModel.swift ObservableObject; UI state + phase + failure + volatile last entry; DI seam
   TranslationFailure.swift  classify(Error) → named failure; PURE message(sourceName:targetName:)
@@ -150,7 +150,10 @@ docs/{en,ja}/            RFP + adr/
   and re-registers on `UserDefaults.didChangeNotification` when the combo changes.
   Hotkey-open (`hotKeyPressed` → `showPanel(seedClipboard: true)`) seeds the source
   from the clipboard when the setting is on; the status-item click doesn't seed. The
-  recorder swallows keys via a local `keyDown` monitor while capturing.
+  recorder swallows keys via a local `keyDown` monitor while capturing. The × beside
+  it stores `HotKeyCombo.disabled` (no modifiers) — a *value*, because removing the
+  defaults would bring back the registered ⌥⌘T; `register` skips it as invalid. It is
+  not named `none`, which reads as `Optional.none` where a combo is optional.
 - **Panel is `.nonactivatingPanel`** (don't remove) — an ordinary NSPanel only renders
   while the app is active, and macOS 14+ focus-stealing prevention can deny activation
   for ~30 s after launch, so the panel was `isVisible` but never shown ("won't open

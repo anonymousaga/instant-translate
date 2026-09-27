@@ -56,4 +56,28 @@ final class HotKeyComboTests: XCTestCase {
     func testCurrentFallsBackToDefault() {
         XCTAssertEqual(HotKeyCombo.current(ephemeral()), .default)
     }
+
+    // MARK: - No shortcut
+
+    func testDisabledIsNotAValidHotkey() {
+        // `GlobalHotKey.register` skips invalid combos — that is what removes it.
+        XCTAssertFalse(HotKeyCombo.disabled.isValid)
+    }
+
+    func testRemovedShortcutStaysRemovedAcrossLaunches() {
+        // Persisted as a value, not as missing defaults, which would mean ⌥⌘T.
+        let d = ephemeral()
+        HotKeyCombo.disabled.save(d)
+        XCTAssertEqual(HotKeyCombo.current(d), .disabled)
+        XCTAssertFalse(HotKeyCombo.current(d).isValid)
+    }
+
+    func testLabelShowsTheComboOrNone() {
+        XCTAssertEqual(HotKeyCombo.default.label, "⌥⌘T")
+        XCTAssertEqual(HotKeyCombo.disabled.label, "None")
+        // An unusable stored value (shift only) registers nothing, so it reads None too.
+        let shiftOnly = HotKeyCombo(keyCode: UInt16(kVK_ANSI_T),
+                                    modifiers: NSEvent.ModifierFlags.shift.rawValue)
+        XCTAssertEqual(shiftOnly.label, "None")
+    }
 }

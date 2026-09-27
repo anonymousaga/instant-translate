@@ -35,7 +35,8 @@ and light. macOS 26+ (Apple silicon). Signed with Developer ID and notarized.
   bigger or smaller, and **⌘0** returns to the system size (the keypad **+** / **−**
   work too). Only the text grows — controls keep their sizes — and the size is
   remembered across launches.
-- **Global hotkey**: press **⌥⌘T** (rebindable in Settings) to open the panel from
+- **Global hotkey**: press **⌥⌘T** (rebindable in Settings, or removed with the **×**
+  beside it — then open the panel from the menu bar) to open the panel from
   anywhere. On open it can seed the source from your clipboard and translate it.
 - **Only OS-supported languages**: the pickers list exactly the languages your Mac's
   Translation framework supports; unsupported pairs are reported clearly.

@@ -5,19 +5,34 @@ import SwiftUI
 /// A click-to-record control for a global hotkey. Clicking starts capture; the next
 /// key press with at least one modifier becomes the combo. Esc cancels. While
 /// recording, key events are swallowed (a local monitor returning nil) so they don't
-/// type into the settings window.
+/// type into the settings window. The × beside it removes the shortcut, like the
+/// clear button of a search field; it is shown only when there is one to remove,
+/// and its space is kept so the recorder never moves.
 struct HotKeyRecorder: View {
     @Binding var combo: HotKeyCombo
     @State private var recording = false
     @State private var monitor: Any?
 
     var body: some View {
-        Button(action: toggle) {
-            Text(recording ? "Press shortcut…" : combo.displayString)
-                .monospaced()
-                .frame(minWidth: 96)
+        HStack(spacing: 4) {
+            Button(action: toggle) {
+                Text(recording ? "Press shortcut…" : combo.label)
+                    .monospaced()
+                    .frame(minWidth: 96)
+            }
+            .help(recording ? "Press a shortcut, or Esc to cancel" : "Click to change the shortcut")
+
+            let removable = combo.isValid && !recording
+            Button { combo = .disabled } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.borderless)
+            .help("Remove the shortcut")
+            .accessibilityLabel("Remove the shortcut")
+            .opacity(removable ? 1 : 0)
+            .disabled(!removable)
         }
-        .help(recording ? "Press a shortcut, or Esc to cancel" : "Click to change the shortcut")
         .onDisappear(perform: stop)
     }
 

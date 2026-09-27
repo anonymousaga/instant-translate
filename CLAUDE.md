@@ -48,7 +48,7 @@ programmatic Translation API and this app's deployment target are macOS 26.
 - `LanguagePolicy.swift` — **pure** target-language routing (local / secondary / auto-swap). Unit-tested.
 - `LanguageDetector.swift` — `NLLanguageRecognizer` detection (→ base subtag) with a **pure** preferred-language tie-break (`resolve(hypotheses:preferred:)`, biased toward local + secondary). Feeds the policy and the session's explicit source. Unit-tested.
 - `HotKey.swift` — `HotKeyCombo` (persist/display/Carbon masks, unit-tested) + `GlobalHotKey` (Carbon `RegisterEventHotKey`).
-- `HotKeyRecorder.swift` — click-to-record shortcut control (local `keyDown` monitor).
+- `HotKeyRecorder.swift` — click-to-record shortcut control (local `keyDown` monitor), with an × that stores `HotKeyCombo.disabled` (a persisted "no shortcut" — removing the defaults would restore ⌥⌘T).
 - `SettingsStore.swift` — `UserDefaults` keys/defaults + snapshot; builds a `LanguagePolicy`.
 - `TranslationModel.swift` — `ObservableObject`; UI state + `phase` + `failure` + the volatile most-recent entry + `targetOverride` (manual target, nil = Auto) + `sourceOverride` (source pin, nil = Auto; `resolvedSource` = pin ?? detection). DI seam via `TextTranslating`.
 - `TranslationFailure.swift` — `classify(Error)` (the only place that matches `TranslationError`) + a **pure** `message(sourceName:targetName:)` → headline / recovery / technical detail. Unit-tested.
