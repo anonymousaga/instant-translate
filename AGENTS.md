@@ -253,4 +253,7 @@ ADR-0001.
 - ADR-0001 — panel feedback and failure messages:
   `docs/en/adr/0001-panel-feedback-and-failure-messages.md`
   (`docs/ja/adr/0001-panel-feedback-and-failure-messages.ja.md`)
+- ADR-0002 — panel text size (⌘+ / ⌘− / ⌘0):
+  `docs/en/adr/0002-panel-text-size.md`
+  (`docs/ja/adr/0002-panel-text-size.ja.md`)
 - Sibling: https://github.com/nlink-jp/quick-translate
