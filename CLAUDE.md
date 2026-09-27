@@ -166,5 +166,5 @@ programmatic Translation API and this app's deployment target are macOS 26.
 ## Design reference
 
 - RFP: `docs/ja/instant-translate-rfp.ja.md` (`docs/en/instant-translate-rfp.md`)
-- ADRs: `docs/{en,ja}/adr/` — 0001 panel feedback and failure messages, 0002 panel text size, 0003 panel layout and minimum size
+- ADRs: `docs/{en,ja}/adr/` — 0001 panel feedback and failure messages, 0002 panel text size, 0003 panel layout and minimum size, 0004 detection prior for the user's own languages
 - Sibling: https://github.com/nlink-jp/quick-translate

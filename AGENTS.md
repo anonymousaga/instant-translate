@@ -304,4 +304,7 @@ ADR-0001.
 - ADR-0003 — panel layout and minimum size:
   `docs/en/adr/0003-panel-layout-and-minimum-size.md`
   (`docs/ja/adr/0003-panel-layout-and-minimum-size.ja.md`)
+- ADR-0004 — detection prior for the user's own languages (`languageHints`):
+  `docs/en/adr/0004-detection-prior-for-own-languages.md`
+  (`docs/ja/adr/0004-detection-prior-for-own-languages.ja.md`)
 - Sibling: https://github.com/nlink-jp/quick-translate
