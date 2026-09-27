@@ -21,6 +21,9 @@ enum SettingsKey {
     /// Deliberately *not* registered below: absence means "use the system body size",
     /// and ⌘0 removes the key to return to it.
     static let textSize = "textSize"
+    /// A comma-separated list of NaturalLanguage detection identifiers. An empty
+    /// value means detection is unrestricted.
+    static let detectionLanguages = "detectionLanguages"
 
     static func registerDefaults(_ d: UserDefaults = .standard) {
         d.register(defaults: [
@@ -31,6 +34,7 @@ enum SettingsKey {
             copyOnTranslate: false,
             hotKeyKeyCode: Int(HotKeyCombo.default.keyCode),
             hotKeyModifiers: Int(bitPattern: HotKeyCombo.default.modifiers),
+            detectionLanguages: ""
         ])
     }
 }
@@ -44,6 +48,16 @@ struct SettingsStore: Equatable {
     var autoTranslate: Bool = true
     var clipboardAutoTranslate: Bool
     var copyOnTranslate: Bool
+    var detectionLanguages: String = ""
+
+    var detectionLanguageList: [String] {
+        detectionLanguages
+            .split(separator: ",")
+            .map { DetectionLanguageCatalog.canonicalIdentifier(String($0)) }
+            .reduce(into: [String]()) { result, language in
+                if !result.contains(language) { result.append(language) }
+            }
+    }
 
     static func current(_ d: UserDefaults = .standard) -> SettingsStore {
         SettingsStore(
@@ -51,7 +65,8 @@ struct SettingsStore: Equatable {
             autoSwapEnabled: d.bool(forKey: SettingsKey.autoSwapEnabled),
             autoTranslate: d.bool(forKey: SettingsKey.autoTranslate),
             clipboardAutoTranslate: d.bool(forKey: SettingsKey.clipboardAutoTranslate),
-            copyOnTranslate: d.bool(forKey: SettingsKey.copyOnTranslate)
+            copyOnTranslate: d.bool(forKey: SettingsKey.copyOnTranslate),
+            detectionLanguages: d.string(forKey: SettingsKey.detectionLanguages) ?? ""
         )
     }
 

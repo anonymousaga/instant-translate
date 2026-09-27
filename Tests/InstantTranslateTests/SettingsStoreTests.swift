@@ -40,4 +40,18 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(p.target(forDetectedSource: "ja"), "en")     // my language → secondary
         XCTAssertEqual(p.target(forDetectedSource: "en"), "ja")     // foreign → my language
     }
+
+    func testEmptyDetectionSelectionMeansAllLanguages() {
+        let s = SettingsStore(secondaryLanguage: "en", autoSwapEnabled: true,
+                              clipboardAutoTranslate: true, copyOnTranslate: false,
+                              detectionLanguages: "")
+        XCTAssertTrue(s.detectionLanguageList.isEmpty)
+    }
+
+    func testDetectionSelectionsMigrateFromTranslationIdentifiers() {
+        let s = SettingsStore(secondaryLanguage: "en", autoSwapEnabled: true,
+                              clipboardAutoTranslate: true, copyOnTranslate: false,
+                              detectionLanguages: "en-GB,zh-TW,en")
+        XCTAssertEqual(s.detectionLanguageList, ["en", "zh-Hant"])
+    }
 }

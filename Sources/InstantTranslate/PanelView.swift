@@ -399,9 +399,11 @@ struct PanelView: View {
         debounceTask?.cancel()          // a manual translate supersedes any pending auto-run
         model.failure = nil
         let settings = SettingsStore.current()
+        let constraints = settings.detectionLanguageList
         model.detectedSource = LanguageDetector.detect(
             model.sourceText,
-            preferred: [SettingsStore.localLanguage(), settings.secondaryLanguage])
+            preferred: [SettingsStore.localLanguage(), settings.secondaryLanguage],
+            constraints: constraints)
         model.resolveTarget()           // before the guard, so the "Auto (…)" hint stays honest
         if automatic, !AutoTranslatePolicy.mayRun(resolvedSource: model.resolvedSource,
                                                   isComposing: model.isComposing) {

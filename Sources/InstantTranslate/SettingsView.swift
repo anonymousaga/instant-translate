@@ -20,6 +20,7 @@ struct SettingsView: View {
     @AppStorage(SettingsKey.copyOnTranslate) private var copyOnTranslate = false
     @AppStorage(SettingsKey.hotKeyKeyCode) private var hotKeyKeyCode = Int(HotKeyCombo.default.keyCode)
     @AppStorage(SettingsKey.hotKeyModifiers) private var hotKeyModifiers = Int(bitPattern: HotKeyCombo.default.modifiers)
+    @AppStorage(SettingsKey.detectionLanguages) private var detectionLanguages = ""
 
     @State private var launchAtLogin = LoginItem.isEnabled
 
@@ -51,6 +52,21 @@ struct SettingsView: View {
                         }
                         Toggle("Auto-swap when input is my language", isOn: $autoSwapEnabled)
                         Text("Output goes to your system language. When the input is already your language, it goes to the secondary language instead.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer().frame(height: 2)
+                        Text("Restrict which languages can be used to detect the input language. If none are selected, all languages are allowed.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Menu("Detection Languages") {
+                            ForEach(DetectionLanguageCatalog.options(
+                                supportedTranslationIdentifiers: catalog.options.map(\.id))) { opt in
+                                Toggle(opt.name, isOn: detectionLanguageBinding(for: opt.id))
+                            }
+                        }
+                        Text(detectionRuleText)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -103,5 +119,37 @@ struct SettingsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear { launchAtLogin = LoginItem.isEnabled }   // reflect external changes
+    }
+
+    private var selectedDetectionLanguages: [String] {
+        detectionLanguages
+            .split(separator: ",")
+            .map { DetectionLanguageCatalog.canonicalIdentifier(String($0)) }
+            .reduce(into: [String]()) { result, language in
+                if !result.contains(language) { result.append(language) }
+            }
+    }
+
+    private var detectionRuleText: String {
+        let selected = selectedDetectionLanguages
+        guard !selected.isEmpty else {
+            return "Detecting from all languages."
+        }
+        let names = selected.map { DetectionLanguageCatalog.name(for: $0) }
+        return "Detecting from: \(names.joined(separator: ", "))."
+    }
+
+    private func detectionLanguageBinding(for id: String) -> Binding<Bool> {
+        Binding(
+            get: { selectedDetectionLanguages.contains(id) },
+            set: { selected in
+                var languages = selectedDetectionLanguages
+                if selected {
+                    if !languages.contains(id) { languages.append(id) }
+                } else {
+                    languages.removeAll { $0 == id }
+                }
+                detectionLanguages = languages.joined(separator: ",")
+            })
     }
 }
