@@ -23,7 +23,10 @@ and light. macOS 26+ (Apple silicon). Signed with Developer ID and notarized.
   When detection is a close call (kanji-only text reads as Japanese *or* Chinese),
   your own languages — system + secondary — win the tie, and the chosen language is
   told to the translator explicitly, so macOS doesn't interrupt you with its
-  "which language is this?" picker.
+  "which language is this?" picker. Your own languages are also favoured for short
+  input — a few words that would otherwise be taken for a neighbouring language
+  ("under" for Swedish, say). If detection still guesses wrong, pin the input
+  language with the source picker.
 - **Pin the input language**: a source picker in the panel ("Auto" + languages)
   skips detection entirely and always translates as the pinned language — for when
   you know what you're pasting. Resets to Auto on restart.

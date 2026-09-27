@@ -6,6 +6,16 @@ Semantic Versioning.
 
 ## [Unreleased]
 
+### Fixed
+
+- Short input in your own languages was often detected as a neighbouring
+  language — "under" as Swedish, "begin" as Dutch, "im a cat" as Catalan for an
+  English + Korean user. Detection now weighs your system and secondary
+  languages as more likely (a prior over every language the recognizer knows,
+  so other languages stay detectable). Some very short input can still be
+  guessed wrong; pin the input language with the source picker. ADR-0004.
+  Reported by @anonymousaga in #2.
+
 ## [0.4.0] - 2026-09-27
 
 ### Added

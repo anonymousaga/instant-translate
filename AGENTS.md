@@ -31,7 +31,7 @@ Sources/InstantTranslate/
   App.swift              NSApplicationDelegateAdaptor(AppController) + placeholder Settings scene
   AppController.swift    NSStatusItem + translation NSPanel (hosts PanelView) + settings NSWindow; show/hide/focus; openSettings
   LanguagePolicy.swift   PURE routing: local / secondary / auto-swap → target lang
-  LanguageDetector.swift NLLanguageRecognizer detection → base subtag; PURE preferred-language tie-break (resolve)
+  LanguageDetector.swift NLLanguageRecognizer detection → base subtag; PURE prior over known languages (hints) + tie-break (resolve)
   LoginItem.swift        SMAppService.mainApp wrapper ("launch at login" toggle)
   Languages.swift        curated fallback language list + localized name
   LanguageCatalog.swift  async OS-supported languages → LanguageOption list (region-qualified when needed)
@@ -253,6 +253,16 @@ docs/{en,ja}/            RFP + adr/
   whenever *it* was unsure, even when we weren't. `nil` reaches the framework only
   for a manual ⌘↩ on genuinely undetectable input (deliberate: the OS dialog is the
   last resort there). Note the config rebuild check compares source *and* target.
+- **Detection runs with a prior for the user's own languages** (ADR-0004) —
+  `LanguageDetector.hints(preferred:)` gives every language in `knownLanguages` 1 and
+  the local + secondary languages `ownLanguageWeight` (20). Measured limits: larger
+  weights took Chinese sentences for Japanese and Danish for Norwegian. **Never hint
+  only the preferred languages** — languages left out of the hints behave as prior 0
+  (measured: it acts as a restriction). `knownLanguages` must hold every language the
+  recognizer can return; `testEveryLanguageTheRecognizerReturnsIsKnown` checks it. The
+  behaviour tests depend on Apple's model: after an OS update, re-measure rather than
+  edit expectations. Input that is still misdetected is what the source picker is for —
+  no restriction setting (reporter's proposal, rejected in the ADR).
 - **Settings is a separate AppKit `NSWindow`** (`AppController.openSettings`), not the
   SwiftUI `Settings` scene / `showSettingsWindow:` (unreliable for a menu-only
   `LSUIElement` app). An in-panel 3D card flip was tried and reverted — the 180°

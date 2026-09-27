@@ -12,17 +12,53 @@ enum LanguageDetector {
     /// "in contention": close enough that a preferred language beats the raw winner.
     static let ambiguityRatio = 0.5
 
+    /// Weight of the user's own languages in the detection prior (ADR-0004). Measured
+    /// on macOS 27.0: 20 fixes most short input in the user's languages ("under",
+    /// "begin", "im a cat" for English + Korean); 50 and above started taking Chinese
+    /// sentences for Japanese and Danish for Norwegian.
+    static let ownLanguageWeight = 20.0
+
+    /// Every language `NLLanguageRecognizer` documents, `undetermined` aside. A language
+    /// missing here gets no prior at all and is never detected — hints act on the
+    /// listed languages only — so a test checks this list against what the recognizer
+    /// actually returns.
+    static let knownLanguages: [NLLanguage] = [
+        .amharic, .arabic, .armenian, .bengali, .bulgarian, .burmese, .catalan, .cherokee,
+        .croatian, .czech, .danish, .dutch, .english, .finnish, .french, .georgian, .german,
+        .greek, .gujarati, .hebrew, .hindi, .hungarian, .icelandic, .indonesian, .italian,
+        .japanese, .kannada, .kazakh, .khmer, .korean, .lao, .malay, .malayalam, .marathi,
+        .mongolian, .norwegian, .oriya, .persian, .polish, .portuguese, .punjabi, .romanian,
+        .russian, .simplifiedChinese, .sinhalese, .slovak, .spanish, .swedish, .tamil,
+        .telugu, .thai, .tibetan, .traditionalChinese, .turkish, .ukrainian, .urdu, .vietnamese,
+    ]
+
+    /// The detection prior (ADR-0004): every known language at 1, the user's own
+    /// languages — matched by base subtag, so `zh` covers both scripts and `en-GB`
+    /// means English — at `ownLanguageWeight`. Hinting only the own languages would
+    /// act as a restriction (measured): everything else would stop being detected.
+    static func hints(preferred: [String]) -> [NLLanguage: Double] {
+        let own = Set(preferred.map(LanguagePolicy.base))
+        var hints: [NLLanguage: Double] = [:]
+        for language in knownLanguages {
+            hints[language] = own.contains(LanguagePolicy.base(language.rawValue)) ? ownLanguageWeight : 1
+        }
+        return hints
+    }
+
     /// The dominant language of `text` as a base subtag ("ja", "en", "zh"), or `nil`
     /// when the text is empty or undetectable.
     ///
-    /// `preferred` (typically the user's local + secondary languages) breaks ties:
-    /// when the recognizer's candidates are close — kanji-only text is a classic
-    /// ja/zh coin toss — the highest-probability preferred language in contention
-    /// wins over the raw winner.
+    /// `preferred` (typically the user's local + secondary languages) is used twice:
+    /// as a prior, so short input in the user's own languages is not taken for a
+    /// neighbouring language the recognizer is wrongly sure of (ADR-0004); and to break
+    /// ties, when the candidates are close — kanji-only text is a classic ja/zh coin
+    /// toss — the highest-probability preferred language in contention wins over the
+    /// raw winner. When detection is still wrong, the source picker pins the language.
     static func detect(_ text: String, preferred: [String] = []) -> String? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
         let recognizer = NLLanguageRecognizer()
+        recognizer.languageHints = hints(preferred: preferred)
         recognizer.processString(trimmed)
         guard let dominant = recognizer.dominantLanguage else { return nil }
         let hypotheses = recognizer.languageHypotheses(withMaximum: 8)
