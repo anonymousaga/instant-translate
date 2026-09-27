@@ -139,8 +139,9 @@ on JIS, not `=`), so it never sent `+` or `=` at all.
    row, the "(…)" hint wraps one character per line, the Translate button is
    squeezed to a sliver and the Copy / Quit row is pushed out. The picker row
    ignores the text size, so this is a pre-existing bug of the panel's minimum
-   size (320 × 320 pt), fixed separately. The 80 pt field minimums are
-   re-checked at 28 pt after that fix.
+   size (320 × 320 pt), fixed separately — ADR-0003. After that fix the panel at
+   its minimum size with 28 pt text passed the maintainer's check, so the 80 pt
+   field minimums stay as they are.
 3. **IME composition.** ⌘+ during a kana-kanji conversion leaves the marked
    text untouched; the new size is applied once the conversion is committed
    (the size change waits for `hasMarkedText()` to clear, like the text

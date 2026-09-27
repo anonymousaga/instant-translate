@@ -58,6 +58,7 @@ programmatic Translation API and this app's deployment target are macOS 26.
 - `LanguageCatalog.swift` — async load of OS-supported languages (`LanguageAvailability`) → `[LanguageOption]` (region-qualified when a base has >1 variant); pickers bind to it.
 - `TextTranslating.swift` — protocol + `EchoTranslator` stub (tests/previews).
 - `TextSize.swift` — **pure** ⌘+ / ⌘− ladder stepping and the effective size (stored preference, else system body size, clamped). Unit-tested. ADR-0002.
+- `PanelMinimumSize.swift` — **pure** panel minimum size from the laid-out sizes `PanelView` reports. Unit-tested. ADR-0003.
 - `PanelView.swift` — the translation panel; owns the real `TranslationSession` via `.translationTask`; fills the panel; focus-on-open; debounced auto-translate. Gear → `openSettings`.
 - `SourceTextView.swift` — the source input: an `NSTextView` (`NSViewRepresentable`) that surfaces IME composition state (`hasMarkedText`) and takes first responder on `focusToken`.
 - `AutoTranslatePolicy.swift` — **pure** rules for when a debounced auto-translation may be armed / may run (IME composition, undetectable language). Unit-tested.
@@ -86,6 +87,14 @@ programmatic Translation API and this app's deployment target are macOS 26.
   re-anchored under the status item on each open; focus-on-open is driven by
   `AppController.focusToken` → `PanelView`'s `@FocusState`. `AppController` is also
   the Phase 2 hotkey entry point (`showPanel()`).
+- **The panel's minimum size is measured from its laid-out content** (ADR-0003) —
+  not a constant (it follows the language names) and not `NSHostingView`'s
+  `.minSize` (a 0 × 0 proposal text can't answer; `sizingOptions` is `[]`). The
+  hosting view sits in a plain container, not as `contentView`, or it resizes the
+  window mid-layout and AppKit aborts. Every stretchy view must be subtracted in
+  `PanelMinimumSize.compute`, or the minimum runs away — and never wrap a `Spacer`
+  in a measuring modifier (it then stretches vertically). Hints go *under* the
+  pickers (overlaid on a blank line), so they add no width.
 - **The panel MUST be a `.nonactivatingPanel`** — don't remove it. An ordinary NSPanel
   only renders when the app is active, but macOS 14+ focus-stealing prevention can deny
   `NSApp.activate(ignoringOtherApps:)` for ~30 s after launch, so the panel was
@@ -154,5 +163,5 @@ programmatic Translation API and this app's deployment target are macOS 26.
 ## Design reference
 
 - RFP: `docs/ja/instant-translate-rfp.ja.md` (`docs/en/instant-translate-rfp.md`)
-- ADRs: `docs/{en,ja}/adr/` — 0001 panel feedback and failure messages, 0002 panel text size
+- ADRs: `docs/{en,ja}/adr/` — 0001 panel feedback and failure messages, 0002 panel text size, 0003 panel layout and minimum size
 - Sibling: https://github.com/nlink-jp/quick-translate

@@ -18,6 +18,14 @@ Semantic Versioning.
 
 ### Fixed
 
+- The panel could be shrunk until its layout broke — at any text size: the
+  fixed 320 × 320 pt minimum was narrower than the language row, so the hints
+  wrapped one character per line, the Translate button was squeezed and the
+  Copy / Quit row was pushed out. The minimum is now measured from the laid-out
+  content (it follows the longest language names and grows for a failure
+  block), and the "(language)" hints moved under their pickers so they no longer
+  widen the row. ADR-0003. Reported as a cramped row by @anonymousaga in #1,
+  who also proposed the hints-under-the-pickers layout.
 - The release zip no longer carries AppleDouble (`._*`) entries: the app is
   zipped with `ditto --norsrc --noextattr`, so its signature survives unpacking
   with `unzip`. `make verify-release` refuses a zip that carries them.

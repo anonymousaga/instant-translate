@@ -43,6 +43,7 @@ Sources/InstantTranslate/
   TranslationStatus.swift   TranslationPhase + PURE display() → status-row symbol/text/spinner/tone
   TextTranslating.swift  protocol + EchoTranslator stub (tests/previews)
   TextSize.swift         PURE ⌘+/⌘− ladder stepping + effective size (ADR-0002)
+  PanelMinimumSize.swift PURE panel minimum from laid-out sizes (ADR-0003)
   PanelView.swift        the panel; owns the real TranslationSession via .translationTask
   SettingsView.swift     settings Form (@AppStorage)
 Tests/InstantTranslateTests/
@@ -108,11 +109,29 @@ docs/{en,ja}/            RFP + adr/
   binds the same keys via `@AppStorage`. `SettingsKey.registerDefaults()` runs at
   launch in `App.init`.
 - **AppKit shell, not `MenuBarExtra`** — the menu bar is an `NSStatusItem` and the
-  panel is a resizable `NSPanel` hosting `PanelView` (`NSHostingView`). Reason: a
+  panel is a resizable `NSPanel` hosting `PanelView` (`NSHostingView`, inside a
+  plain container view — see the minimum-size entry). Reason: a
   MenuBarExtra popover can't be user-resized and can't reliably focus a text field.
   The panel autosaves its size and re-anchors under the status item each open;
   focus-on-open = `AppController.focusToken` → `PanelView` `@FocusState`.
   `AppController.showPanel()` is also the Phase 2 hotkey entry point.
+- **The panel's minimum size is measured, not declared** (ADR-0003). `PanelView`
+  reports laid-out sizes via `onGeometryChange`; the pure `PanelMinimumSize.compute`
+  turns them into a minimum (content height − the two fields' stretch beyond
+  80 pt + title bar; pickers + arrow + button + gaps + padding);
+  `AppController.setPanelMinimum` applies it next run-loop turn, capped to the
+  screen, growing a too-small panel. Three traps, each hit once:
+  (1) `NSHostingView`'s own `.minSize` (also in the default `sizingOptions`) measures
+  under a 0 × 0 proposal — single-line text reports 0 height, fixed-height text wraps
+  per character — so it is set to `[]`; (2) as the window's `contentView` the hosting
+  view still resizes the window in `windowDidLayout`, which fought the measured
+  minimum until AppKit threw, so it lives in a plain container view; (3) every
+  stretchy view must be subtracted in `compute`, or the minimum grows with the
+  panel and runs away — a `Spacer` wrapped in a measuring modifier stretches
+  vertically too, so the row pushes the button right with a frame, not a `Spacer`.
+  The "(language)" hints are overlaid on a blank line *under* their pickers, so they
+  add no width; beside the pickers (always, or only when wide enough) was tried and
+  dropped.
 - **The menu bar item is not shown pressed while the panel is open — a known
   limitation, accepted to keep the resizable panel and the hotkey (user's decision,
   2026-09-22).** The user saw it by hand on macOS 27; task-clock-gui, which has the
@@ -268,4 +287,7 @@ ADR-0001.
 - ADR-0002 — panel text size (⌘+ / ⌘− / ⌘0):
   `docs/en/adr/0002-panel-text-size.md`
   (`docs/ja/adr/0002-panel-text-size.ja.md`)
+- ADR-0003 — panel layout and minimum size:
+  `docs/en/adr/0003-panel-layout-and-minimum-size.md`
+  (`docs/ja/adr/0003-panel-layout-and-minimum-size.ja.md`)
 - Sibling: https://github.com/nlink-jp/quick-translate

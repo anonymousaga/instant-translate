@@ -21,6 +21,8 @@ struct PanelView: View {
     @AppStorage(SettingsKey.textSize) private var textSizePreference: Double?
     @State private var configuration: TranslationSession.Configuration?
     @State private var debounceTask: Task<Void, Never>?
+    /// Laid-out sizes the panel's minimum is derived from (`PanelMinimumSize`).
+    @State private var metrics = PanelMinimumSize.Metrics()
 
     /// Idle time after the last keystroke before an automatic translation fires.
     private let autoTranslateDelay: Duration = .milliseconds(600)
@@ -57,7 +59,8 @@ struct PanelView: View {
                            isComposing: $model.isComposing,
                            focusToken: controller.focusToken,
                            fontSize: textSize)
-                .frame(minHeight: 80, maxHeight: .infinity)
+                .frame(minHeight: PanelMinimumSize.fieldMinimum, maxHeight: .infinity)
+                .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { metrics.inputHeight = $0 }
                 .overlay(alignment: .topLeading) {
                     // A caret alone in an empty field is easy to miss; the prompt makes
                     // it unmistakable that the panel is ready for input.
@@ -72,47 +75,7 @@ struct PanelView: View {
                 }
                 .overlay(RoundedRectangle(cornerRadius: 6).stroke(.quaternary))
 
-            HStack(spacing: 6) {
-                // Source pin: Auto = detect, a language = translate as that language
-                // (also keeps the OS from ever asking which language the input is).
-                Picker("", selection: sourceOverrideBinding) {
-                    Text("Auto").tag(String?.none)
-                    Divider()
-                    ForEach(catalog.sourceOptions) { opt in
-                        Text(opt.name).tag(Optional(opt.id))
-                    }
-                }
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .fixedSize()
-                if model.sourceOverride == nil, let detected = model.detectedSource {
-                    // Hint what "Auto" detected in the current input.
-                    Text("(\(catalog.name(for: detected)))")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-                Text("→").foregroundStyle(.secondary)
-                Picker("", selection: targetOverrideBinding) {
-                    Text("Auto").tag(String?.none)
-                    Divider()
-                    ForEach(catalog.options) { opt in
-                        Text(opt.name).tag(Optional(opt.id))
-                    }
-                }
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .fixedSize()
-                if model.targetOverride == nil {
-                    // Hint what "Auto" currently resolves to.
-                    Text("(\(catalog.name(for: model.targetLanguage)))")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-                Spacer()
-                Button("Translate") { translate() }
-                    .keyboardShortcut(.return, modifiers: [.command])
-                    .disabled(isSourceEmpty)
-            }
+            pickerRow
 
             statusRow
 
@@ -125,7 +88,8 @@ struct PanelView: View {
                     .textSelection(.enabled)
                     .foregroundStyle(model.translatedText.isEmpty ? .secondary : .primary)
             }
-            .frame(minHeight: 80, maxHeight: .infinity)
+            .frame(minHeight: PanelMinimumSize.fieldMinimum, maxHeight: .infinity)
+            .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { metrics.outputHeight = $0 }
 
             if let failure = model.failure {
                 failureBlock(failure)
@@ -140,7 +104,14 @@ struct PanelView: View {
             .font(.callout)
         }
         .padding(12)
+        // Measured before the frame below, so an overflowing stack reports the
+        // height it needs rather than the height it was given.
+        .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { metrics.contentHeight = $0 }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onGeometryChange(for: CGFloat.self, of: { $0.safeAreaInsets.top }) { metrics.safeAreaTop = $0 }
+        .onChange(of: metrics, initial: true) { _, m in
+            if let minimum = PanelMinimumSize.compute(m) { controller.setPanelMinimum(minimum) }
+        }
         .background { textSizeShortcuts }
         .onChange(of: model.sourceText) { _, newValue in scheduleAutoTranslate(newValue) }
         .onChange(of: model.isComposing) { _, composing in
@@ -167,6 +138,102 @@ struct PanelView: View {
         .translationTask(configuration) { session in
             await run(session)
         }
+    }
+
+    // MARK: - Picker row
+
+    /// Source picker · arrow · target picker, each with its "(language)" hint on the
+    /// line under it, and the Translate button.
+    ///
+    /// The pickers, the arrow and the button never compress: they are the panel's
+    /// minimum width. Each hint is overlaid on a blank line under its picker, so it
+    /// adds no width at all. Beside the pickers the hints either wrapped one character
+    /// per line when squeezed or, given room, pushed the panel wider as a longer name
+    /// appeared; switching between beside and under by width was tried and dropped —
+    /// the controls shifted as the layout changed.
+    private var pickerRow: some View {
+        let sourceHint = model.sourceOverride == nil ? model.detectedSource.map(catalog.name(for:)) : nil
+        let targetHint = model.targetOverride == nil ? catalog.name(for: model.targetLanguage) : nil
+        return HStack(alignment: .firstTextBaseline, spacing: PanelMinimumSize.rowSpacing) {
+            HStack(alignment: .firstTextBaseline, spacing: PanelMinimumSize.itemSpacing) {
+                VStack(alignment: .leading, spacing: PanelMinimumSize.hintSpacing) {
+                    sourcePicker
+                    hintLine
+                }
+                .overlay(alignment: .bottomLeading) { hint(sourceHint) }
+                arrow
+                VStack(alignment: .leading, spacing: PanelMinimumSize.hintSpacing) {
+                    targetPicker
+                    hintLine
+                }
+                .overlay(alignment: .bottomLeading) { hint(targetHint) }
+            }
+            // What pushes the button right. Not a `Spacer`: wrapped in a measuring
+            // modifier a `Spacer` stops being a stack spacer and stretches vertically.
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Button("Translate") { translate() }
+                .keyboardShortcut(.return, modifiers: [.command])
+                .disabled(isSourceEmpty)
+                .fixedSize()
+                .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { metrics.buttonWidth = $0 }
+        }
+        // A fixed gap, not a `Spacer` (see above): part of the minimum height.
+        .padding(.bottom, PanelMinimumSize.hintGap)
+    }
+
+    /// Source pin: Auto = detect, a language = translate as that language (also keeps
+    /// the OS from ever asking which language the input is).
+    private var sourcePicker: some View {
+        Picker("", selection: sourceOverrideBinding) {
+            Text("Auto").tag(String?.none)
+            Divider()
+            ForEach(catalog.sourceOptions) { opt in
+                Text(opt.name).tag(Optional(opt.id))
+            }
+        }
+        .labelsHidden()
+        .pickerStyle(.menu)
+        .fixedSize()
+        .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { metrics.sourcePickerWidth = $0 }
+    }
+
+    /// Target: Auto = the routing policy, a language = translate into it.
+    private var targetPicker: some View {
+        Picker("", selection: targetOverrideBinding) {
+            Text("Auto").tag(String?.none)
+            Divider()
+            ForEach(catalog.options) { opt in
+                Text(opt.name).tag(Optional(opt.id))
+            }
+        }
+        .labelsHidden()
+        .pickerStyle(.menu)
+        .fixedSize()
+        .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { metrics.targetPickerWidth = $0 }
+    }
+
+    private var arrow: some View {
+        Text("→").foregroundStyle(.secondary).fixedSize()
+            .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { metrics.arrowWidth = $0 }
+    }
+
+    /// A blank caption-height line under each picker: it holds the hint's space
+    /// whether or not there is a hint, so the row never changes height.
+    private var hintLine: some View {
+        Text(" ").font(.caption).hidden()
+    }
+
+    /// A picker's "(language)" hint — what "Auto" detected or resolves to. It is
+    /// overlaid on a `hintLine`, so it is offered the picker's width and cannot widen
+    /// the column: a longer name truncates in the middle, keeping both parentheses
+    /// that mark it as a hint rather than a selection.
+    private func hint(_ name: String?) -> some View {
+        Text(name.map { "(\($0))" } ?? "")
+            .font(.caption)
+            .foregroundStyle(.tertiary)
+            .lineLimit(1)
+            .truncationMode(.middle)
+            .padding(.leading, PanelMinimumSize.hintIndent)
     }
 
     // MARK: - Text size (ADR-0002)

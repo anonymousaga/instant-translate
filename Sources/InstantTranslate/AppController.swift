@@ -136,6 +136,39 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
 
     func hidePanel() { panel?.orderOut(nil) }
 
+    /// Apply the panel's minimum content size, as measured by `PanelView`. If the
+    /// panel is already smaller — at first layout, or when a failure block appears
+    /// in a minimal panel — grow it, keeping its top edge under the menu bar item.
+    ///
+    /// Deferred to the next run-loop turn: the measurement arrives in the middle of
+    /// a layout pass, and resizing the window there asks for another pass from
+    /// inside this one — AppKit aborts the app when that doesn't settle.
+    func setPanelMinimum(_ size: CGSize) {
+        DispatchQueue.main.async { [weak self] in self?.applyPanelMinimum(size) }
+    }
+
+    private func applyPanelMinimum(_ requested: CGSize) {
+        guard let p = panel else { return }
+        // Never demand more than the screen can show: a mis-measured minimum must
+        // not be able to make the panel unusable.
+        var size = requested
+        if let vis = (p.screen ?? NSScreen.main)?.visibleFrame {
+            size.width = min(size.width, vis.width - 16)
+            size.height = min(size.height, vis.height - 16)
+        }
+        guard p.contentMinSize != size else { return }
+        p.contentMinSize = size
+        let content = p.contentRect(forFrameRect: p.frame).size
+        guard content.width < size.width || content.height < size.height else { return }
+        let grown = p.frameRect(forContentRect: NSRect(
+            x: 0, y: 0,
+            width: max(content.width, size.width), height: max(content.height, size.height)))
+        var frame = p.frame
+        frame.origin.y -= grown.height - frame.height
+        frame.size = grown.size
+        p.setFrame(frame, display: true)
+    }
+
     /// Ask `PanelView` to focus its input field (via `focusToken`).
     func focusInput() { focusToken &+= 1 }
 
@@ -197,9 +230,8 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
         p.standardWindowButton(.closeButton)?.isHidden = true
         p.standardWindowButton(.miniaturizeButton)?.isHidden = true
         p.standardWindowButton(.zoomButton)?.isHidden = true
-        // Height leaves room for the always-present status row on top of the two
-        // 80 pt text areas; below this the panel starts squashing them.
-        p.minSize = NSSize(width: 320, height: 320)
+        // No fixed minimum: `PanelView` measures its laid-out content and reports
+        // the minimum through `setPanelMinimum` (see `PanelMinimumSize`).
         p.setFrameAutosaveName("InstantTranslatePanel")   // remembers the user's chosen size
 
         let host = NSHostingView(rootView:
@@ -208,7 +240,17 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
                 .environmentObject(self)
                 .environmentObject(languageCatalog))
         host.autoresizingMask = [.width, .height]
-        p.contentView = host
+        // The hosting view's own minimum (the default `.minSize` option) measures
+        // under a 0 × 0 proposal, which text can't answer — turn it off so it can't
+        // overwrite the measured one.
+        host.sizingOptions = []
+        // And keep it out of the window-sizing business altogether: as a window's
+        // `contentView` an `NSHostingView` also resizes the window itself during
+        // layout, which fought `setPanelMinimum` until AppKit aborted the app (a
+        // layout pass that never settled). Inside a plain container it doesn't.
+        let container = NSView(frame: host.frame)
+        container.addSubview(host)
+        p.contentView = container
         panel = p
         return p
     }
