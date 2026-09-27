@@ -88,7 +88,7 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 // Settings is where people habitually look for a version number.
-                Text("instant-translate \(AppInfo.version)")
+                Text("nlink-jp instant-translate \(AppInfo.version)")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                     .textSelection(.enabled)
