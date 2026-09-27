@@ -356,9 +356,7 @@ struct PanelView: View {
                                           autoTranslateEnabled: autoTranslate,
                                           isComposing: model.isComposing) {
         case .clearOutput:
-            model.translatedText = ""
-            model.failure = nil
-            model.phase = .idle
+            model.clearForEmptyInput()
         case .ignore:
             // Two different reasons to do nothing, and they read very differently to
             // the user: an IME is mid-conversion (transient, will resume), or

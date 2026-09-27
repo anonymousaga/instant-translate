@@ -96,6 +96,19 @@ final class TranslationModel: ObservableObject {
         }
     }
 
+    /// The input became empty: drop everything that described it — the translation,
+    /// any failure, and the detected language. The hints under the pickers are about
+    /// the current input, so a detection must not outlive the text it came from; the
+    /// target is re-routed without it. Pins and overrides are the user's choices and
+    /// stay.
+    func clearForEmptyInput() {
+        translatedText = ""
+        failure = nil
+        phase = .idle
+        detectedSource = nil
+        resolveTarget()
+    }
+
     /// Record a failure.
     func fail(_ message: FailureMessage) {
         failure = message

@@ -45,6 +45,34 @@ final class TranslationModelTests: XCTestCase {
         XCTAssertEqual(m.translatedText, "[fr] Hello")
     }
 
+    func testClearingTheInputForgetsTheDetectedLanguage() async {
+        // The "(language)" hint must not outlive the text it described.
+        let m = model(local: "ja", secondary: "en", autoSwap: true)
+        m.sourceText = "こんにちは"
+        m.detectedSource = "ja"
+        await m.translateUsingInjected()
+        XCTAssertEqual(m.targetLanguage, "en")                 // my language → secondary
+
+        m.sourceText = ""
+        m.clearForEmptyInput()
+        XCTAssertNil(m.detectedSource)
+        XCTAssertEqual(m.targetLanguage, "ja")                 // re-routed with no detection
+        XCTAssertEqual(m.translatedText, "")
+        XCTAssertNil(m.failure)
+        XCTAssertEqual(m.phase, .idle)
+    }
+
+    func testClearingTheInputKeepsTheUsersPins() {
+        let m = model(local: "ja", secondary: "en", autoSwap: true)
+        m.sourceOverride = "de"
+        m.targetOverride = "fr"
+        m.detectedSource = "en"
+        m.clearForEmptyInput()
+        XCTAssertEqual(m.sourceOverride, "de")
+        XCTAssertEqual(m.targetOverride, "fr")
+        XCTAssertEqual(m.targetLanguage, "fr")
+    }
+
     func testClearingOverrideReturnsToAutoRouting() {
         let m = model(local: "ja", secondary: "en", autoSwap: true)
         m.detectedSource = "en"

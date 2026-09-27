@@ -18,6 +18,10 @@ Semantic Versioning.
 
 ### Fixed
 
+- Clearing the input left the source picker's "(language)" hint — and the
+  target routed from it — describing text that was no longer there. Emptying
+  the input now forgets the detected language and re-routes the target; pins
+  and manual targets are kept.
 - The panel could be shrunk until its layout broke — at any text size: the
   fixed 320 × 320 pt minimum was narrower than the language row, so the hints
   wrapped one character per line, the Translate button was squeezed and the
