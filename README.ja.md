@@ -9,11 +9,9 @@ macOS 標準の **Translation framework**（オンデバイス翻訳）を使う
 意図して入れていません。訳文を読み上げたいときは、訳文を選択して右クリック ›
 スピーチ › 読み上げを開始、で macOS が読み上げます。
 
-[`quick-translate`](https://github.com/nlink-jp/quick-translate)（ローカル LLM）の
-**軽量姉妹**です。メニューバーの UX は同じで、バックエンドが違います。LLM の
-品質・カスタム性が欲しいときは `quick-translate`、素早く軽く使いたいときは
-instant-translate、と使い分けます。macOS 26 以降（Apple silicon）。Developer ID
-署名 + notarize 済み。
+[`quick-translate`](https://github.com/nlink-jp/quick-translate)（ローカル LLM、
+アーカイブ済み）の**後継**です。メニューバーの UX は同じで、バックエンドが違います。
+macOS 26 以降（Apple silicon）。Developer ID 署名 + notarize 済み。
 
 ## できること
 
@@ -94,10 +92,10 @@ macOS 26 SDK（新しめの Xcode / Command Line Tools）が必要です。
 
 ## なぜ Apple Translation（LLM ではなく）か
 
-`quick-translate` は高品質・カスタム可能な翻訳のためにローカル LLM（数十GB）を
-ロードしますが、起動が遅くメモリ負荷も大きい。instant-translate はそれを OS の
-オンデバイスモデルに置き換え、ほぼ瞬時・軽量で、日常の短文翻訳には十分な品質を
-得ます。両者は共存します。
+前身の `quick-translate` は、高品質・カスタム可能な翻訳のためにローカル LLM
+（数十GB）をロードしていましたが、起動が遅くメモリ負荷も大きかった。instant-translate
+はそれを OS のオンデバイスモデルに置き換え、ほぼ瞬時・軽量で、日常の短文翻訳には
+十分な品質を得ます。`quick-translate` はこれに置き換えられ、アーカイブされました。
 
 ## ライセンス
 
