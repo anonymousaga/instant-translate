@@ -17,7 +17,7 @@ struct PanelView: View {
     @EnvironmentObject private var controller: AppController
     @EnvironmentObject private var catalog: LanguageCatalog
     @AppStorage(SettingsKey.autoTranslate) private var autoTranslate = true
-    /// ⌘+ / ⌘− preference; nil = system body size (ADR-0002).
+    /// ⌘+ / ⌘− preference; nil = system body size ().
     @AppStorage(SettingsKey.textSize) private var textSizePreference: Double?
     @State private var configuration: TranslationSession.Configuration?
     @State private var debounceTask: Task<Void, Never>?
@@ -248,7 +248,7 @@ struct PanelView: View {
             .padding(.leading, PanelMinimumSize.hintIndent)
     }
 
-    // MARK: - Text size (ADR-0002)
+    // MARK: - Text size ()
 
     /// The content text size: the ⌘+ / ⌘− preference, else the system body size.
     private var textSize: Double {

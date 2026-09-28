@@ -1,7 +1,7 @@
 import Foundation
 
 /// The size of the panel's *content* text — the input, its placeholder and the
-/// translation. Controls keep their sizes (ADR-0002).
+/// translation. Controls keep their sizes ().
 ///
 /// ⌘+ / ⌘− step through a fixed ladder that widens as it grows; ⌘0 drops the
 /// preference, which means "use the system body size". Pure, so the stepping

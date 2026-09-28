@@ -208,7 +208,7 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
             })
             .environmentObject(languageCatalog))
         host.autoresizingMask = [.width, .height]
-        // As for the panel (ADR-0003): the window is sized by us, so keep the hosting
+        // As for the panel (): the window is sized by us, so keep the hosting
         // view out of window sizing — no size options, and not the `contentView`.
         host.sizingOptions = []
         let container = NSView(frame: NSRect(x: 0, y: 0, width: 440, height: 540))

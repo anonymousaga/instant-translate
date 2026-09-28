@@ -26,7 +26,6 @@ struct FailureMessage: Equatable {
 /// through `TranslationError`'s custom `~=`. This enum does that matching once, in
 /// `classify`, so everything downstream works with a value it can reason about.
 ///
-/// See `docs/en/adr/0001-panel-feedback-and-failure-messages.md`.
 enum TranslationFailure: Equatable {
     /// Our own pre-flight verdict (`LanguageAvailability.status` == `.unsupported`),
     /// reached before a session is ever used.

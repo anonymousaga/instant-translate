@@ -17,7 +17,7 @@ enum SettingsKey {
     /// Global hotkey that opens the panel — virtual key code + modifier flags.
     static let hotKeyKeyCode = "hotKeyKeyCode"
     static let hotKeyModifiers = "hotKeyModifiers"
-    /// Point size of the panel's content text, set with ⌘+ / ⌘− (ADR-0002).
+    /// Point size of the panel's content text, set with ⌘+ / ⌘− ().
     /// Deliberately *not* registered below: absence means "use the system body size",
     /// and ⌘0 removes the key to return to it.
     static let textSize = "textSize"

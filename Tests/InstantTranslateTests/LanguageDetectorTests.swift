@@ -78,7 +78,7 @@ final class LanguageDetectorTests: XCTestCase {
         XCTAssertNil(LanguageDetector.resolve(hypotheses: [:], preferred: ["ja"]))
     }
 
-    // MARK: - hints(preferred:) — the detection prior (ADR-0004)
+    // MARK: - hints(preferred:) — the detection prior ()
 
     func testHintsCoverEveryKnownLanguage() {
         let hints = LanguageDetector.hints(preferred: [])
@@ -140,10 +140,10 @@ final class LanguageDetectorTests: XCTestCase {
         XCTAssertEqual(unknown, [], "add these to LanguageDetector.knownLanguages")
     }
 
-    // MARK: - behaviour against the OS model (ADR-0004)
+    // MARK: - behaviour against the OS model ()
     //
     // These depend on Apple's language model. If one fails after an OS update,
-    // re-measure the weight (ADR-0004's table) — do not just edit the expectation.
+    // re-measure the weight ('s table) — do not just edit the expectation.
 
     func testShortEnglishIsEnglishForAnEnglishAndKoreanUser() {
         // From issue #2: without the prior these came out Catalan, Polish, Swedish and Dutch.

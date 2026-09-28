@@ -13,7 +13,7 @@ final class SingleInstanceTests: XCTestCase {
     func testNoRunningInstancesProceeds() {
         XCTAssertEqual(
             singleInstanceDecision(
-                bundleID: "jp.nlink.instant-translate", ownPID: 42, instancePIDs: []
+                bundleID: "com.anonymousaga.instant-translate-enhanced", ownPID: 42, instancePIDs: []
             ),
             .proceed
         )
@@ -23,7 +23,7 @@ final class SingleInstanceTests: XCTestCase {
         // The enumeration may include the launching process itself.
         XCTAssertEqual(
             singleInstanceDecision(
-                bundleID: "jp.nlink.instant-translate", ownPID: 42, instancePIDs: [42]
+                bundleID: "com.anonymousaga.instant-translate-enhanced", ownPID: 42, instancePIDs: [42]
             ),
             .proceed
         )
@@ -31,7 +31,7 @@ final class SingleInstanceTests: XCTestCase {
 
     func testAnotherInstanceExits() {
         guard case .exitDuplicate(let message) = singleInstanceDecision(
-            bundleID: "jp.nlink.instant-translate", ownPID: 42, instancePIDs: [97316]
+            bundleID: "com.anonymousaga.instant-translate-enhanced", ownPID: 42, instancePIDs: [97316]
         ) else {
             return XCTFail("expected exitDuplicate")
         }
@@ -41,7 +41,7 @@ final class SingleInstanceTests: XCTestCase {
 
     func testAllOtherPIDsAreListed() {
         guard case .exitDuplicate(let message) = singleInstanceDecision(
-            bundleID: "jp.nlink.instant-translate", ownPID: 1, instancePIDs: [1, 2, 3]
+            bundleID: "com.anonymousaga.instant-translate-enhanced", ownPID: 1, instancePIDs: [1, 2, 3]
         ) else {
             return XCTFail("expected exitDuplicate")
         }

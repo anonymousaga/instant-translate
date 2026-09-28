@@ -7,7 +7,6 @@ import Foundation
 /// switched off). Before this existed they were all indistinguishable from a hang,
 /// because a `Bool` can only say "running / not running".
 ///
-/// See `docs/en/adr/0001-panel-feedback-and-failure-messages.md`.
 enum TranslationPhase: Equatable {
     /// Nothing pending.
     case idle

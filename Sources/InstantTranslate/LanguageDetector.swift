@@ -12,7 +12,7 @@ enum LanguageDetector {
     /// "in contention": close enough that a preferred language beats the raw winner.
     static let ambiguityRatio = 0.5
 
-    /// Weight of the user's own languages in the detection prior (ADR-0004). Measured
+    /// Weight of the user's own languages in the detection prior (). Measured
     /// on macOS 27.0 through the whole pipeline (prior, then `resolve`): 20 fixes most
     /// short input in the user's languages ("under", "begin", "im a cat", "im odd" for
     /// English + Korean); 50 took Danish for Norwegian.
@@ -22,7 +22,7 @@ enum LanguageDetector {
     /// Chinese share the script, so weighting either swallows the other from the
     /// smallest weight measured (kanji-only Japanese read as Chinese for a Chinese
     /// user, a Chinese sentence as Japanese for a Japanese user). That collision is
-    /// the `resolve` tie-break's job, as it was before the prior (ADR-0004).
+    /// the `resolve` tie-break's job, as it was before the prior ().
     static let hanScriptLanguages: Set<String> = ["ja", "zh"]
 
     /// Every language `NLLanguageRecognizer` documents, `undetermined` aside, plus one it
@@ -42,7 +42,7 @@ enum LanguageDetector {
         NLLanguage(rawValue: "iu-Cans"),
     ]
 
-    /// The detection prior (ADR-0004): every known language at 1, the user's own
+    /// The detection prior (): every known language at 1, the user's own
     /// languages — matched by base subtag, so `en-GB` means English — at
     /// `ownLanguageWeight`, except `hanScriptLanguages`. Hinting only the own languages
     /// would act as a restriction (measured): everything else would stop being detected.
@@ -60,7 +60,7 @@ enum LanguageDetector {
     ///
     /// `preferred` (typically the user's local + secondary languages) is used twice:
     /// as a prior, so short input in the user's own languages is not taken for a
-    /// neighbouring language the recognizer is wrongly sure of (ADR-0004); and to break
+    /// neighbouring language the recognizer is wrongly sure of (); and to break
     /// ties, when the candidates are close — kanji-only text is a classic ja/zh coin
     /// toss — the highest-probability preferred language in contention wins over the
     /// raw winner. When detection is still wrong, the source picker pins the language.
