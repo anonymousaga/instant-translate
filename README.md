@@ -4,6 +4,11 @@ A **lightweight** macOS menu-bar translator built on the OS **Translation
 framework** (on-device). Open a panel from the menu bar, translate, copy — no
 tens-of-gigabyte model to load.
 
+It is deliberately small: it does one thing — get a translation quickly (type or
+paste, read, copy). Features beyond that are left out on purpose, even where other
+translators have them. To hear the translation read aloud, select it and use the
+right-click menu › Speech › Start Speaking, which macOS provides.
+
 The lightweight sibling of [`quick-translate`](https://github.com/nlink-jp/quick-translate)
 (local LLM): same menu-bar UX, a different backend. Use `quick-translate` when you
 want an LLM's quality/customization; use instant-translate when you want it fast
