@@ -124,7 +124,7 @@ language-switch controls.
 
 ### Phase 3: Release
 
-- README.md / README.ja.md, CHANGELOG.md, AGENTS.md
+- README.md and AGENTS.md
 - Developer ID signing + notarization
 - Homebrew tap (arm64-only prebuilt binary)
 - Update umbrella submodule pointer

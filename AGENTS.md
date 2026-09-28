@@ -45,8 +45,8 @@ Sources/InstantTranslate/
   AutoTranslatePolicy.swift  PURE when a debounced auto-translation may arm / run (IME, undetectable input)
   SourceTextView.swift   the input: NSTextView wrapper exposing IME composition + focus
   Version.swift          AppInfo.version (CFBundleShortVersionString, "dev" outside a bundle)
-  TextSize.swift         PURE ⌘+/⌘− ladder stepping + effective size (ADR-0002)
-  PanelMinimumSize.swift PURE panel minimum from laid-out sizes (ADR-0003)
+  TextSize.swift         PURE ⌘+/⌘− ladder stepping + effective size ()
+  PanelMinimumSize.swift PURE panel minimum from laid-out sizes ()
   WindowPlacement.swift  PURE clamp of a code-resized window back onto the screen
   PanelView.swift        the panel; owns the real TranslationSession via .translationTask
   SettingsView.swift     settings content (@AppStorage); reports its height to fit the window
@@ -58,7 +58,7 @@ Tests/InstantTranslateTests/
 Info.plist               LSUIElement=true, LSMinimumSystemVersion=26.0
 scripts/                 codesign / notarize / make-icns / gen-brew / release-brew.mk / cask.rb.tmpl
 assets/                  AppIcon-1024.png (→ AppIcon.icns at build)
-docs/{en,ja}/            RFP + adr/
+docs/en/                 RFP
 ```
 
 ## Gotchas / conventions
@@ -89,18 +89,18 @@ docs/{en,ja}/            RFP + adr/
   only place in the app that touches the framework's error type. `message(...)` is
   pure. Unplaced errors become `.unknown` carrying `failureReason ??
   localizedDescription` plus domain/code — never drop that, it is all an
-  unanticipated error leaves behind. ADR-0001.
+  unanticipated error leaves behind..
 - **Every state the panel is in must be nameable** — `TranslationPhase` covers the
   states that *withhold* a translation on purpose (IME composition, undetectable
   input, debounce armed, echo) as well as the ones doing work. Before it existed
   they were all indistinguishable from a hang. A new "quietly do nothing" branch
   needs a phase and a line in `TranslationStatus.display`, not a bare `return`.
-  ADR-0001.
+ .
 - **`isTranslating` is derived, not stored** — it is `phase == .preparing ||
   .translating`. Setting a phase is the only way to move the UI; there is no second
   source of truth to drift.
 - **History is volatile** — most-recent entry only, in memory, never persisted.
-- **Text size is ⌘+ / ⌘− / ⌘0 on invisible buttons in `PanelView`** (ADR-0002) —
+- **Text size is ⌘+ / ⌘− / ⌘0 on invisible buttons in `PanelView`** () —
   there is no menu bar to hold them. `.keyboardShortcut` matches modifiers
   *exactly*, so enlarge is bound three times: `"+"`+⌘⇧ (main-row `+`, shifted on
   US and JIS), `"+"`+⌘ (keypad `+`, unshifted) and `"="`+⌘ (US alias). Dropping
@@ -121,7 +121,7 @@ docs/{en,ja}/            RFP + adr/
   The panel autosaves its size and re-anchors under the status item each open;
   focus-on-open = `AppController.focusToken` → `PanelView` `@FocusState`.
   `AppController.showPanel()` is also the Phase 2 hotkey entry point.
-- **The panel's minimum size is measured, not declared** (ADR-0003). `PanelView`
+- **The panel's minimum size is measured, not declared** (). `PanelView`
   reports laid-out sizes via `onGeometryChange`; the pure `PanelMinimumSize.compute`
   turns them into a minimum (content height − the two fields' stretch beyond
   80 pt + title bar; pickers + arrow + button + gaps + padding);
@@ -224,7 +224,7 @@ docs/{en,ja}/            RFP + adr/
   `status` keeps its separate job of rejecting unsupported pairs up front. This is
   narrower than the blanket "never let the OS raise a dialog" stance below — that one
   is about the *source-language* picker, which is avoidable and interrupts typing.
-  ADR-0001.
+ .
 - **Launch at login** — `LoginItem` wraps `SMAppService.mainApp`; `SMAppService` is the
   source of truth (the Settings toggle mirrors `status`, refreshes `.onAppear`, no
   persisted flag). Registration only works from the signed `.app`, not `swift run`.
@@ -253,7 +253,7 @@ docs/{en,ja}/            RFP + adr/
   whenever *it* was unsure, even when we weren't. `nil` reaches the framework only
   for a manual ⌘↩ on genuinely undetectable input (deliberate: the OS dialog is the
   last resort there). Note the config rebuild check compares source *and* target.
-- **Detection runs with a prior for the user's own languages** (ADR-0004) —
+- **Detection runs with a prior for the user's own languages** () —
   `LanguageDetector.hints(preferred:)` gives every language in `knownLanguages` 1 and
   the local + secondary languages `ownLanguageWeight` (20) — **except Japanese and
   Chinese** (`hanScriptLanguages`): they share the script, so any weight on one
@@ -278,7 +278,7 @@ docs/{en,ja}/            RFP + adr/
   window can't feed back) and `AppController.fitSettingsWindow` applies it on the
   next run-loop turn, keeping the top edge, capped to the screen. The hosting view
   sits in a plain container with `sizingOptions = []`, for the same reason as the
-  panel's (ADR-0003).
+  panel's ().
 - **Notification clicks launch by bundle ID — enforce a single instance.**
   Clicking a banner makes notificationd open the app via LaunchServices,
   which resolves `jp.nlink.instant-translate` among *all* registered
@@ -304,21 +304,13 @@ needed Accessibility) — the app needs no TCC grant. See the RFP (with its scop
 
 Post-0.2.0: the panel reports its state (`TranslationPhase` + status row) and
 classifies framework failures into actionable messages (`TranslationFailure`) —
-ADR-0001.
+.
 
 ## Design reference
 
-- RFP: `docs/ja/instant-translate-rfp.ja.md`
-- ADR-0001 — panel feedback and failure messages:
-  `docs/en/adr/0001-panel-feedback-and-failure-messages.md`
-  (`docs/ja/adr/0001-panel-feedback-and-failure-messages.ja.md`)
-- ADR-0002 — panel text size (⌘+ / ⌘− / ⌘0):
-  `docs/en/adr/0002-panel-text-size.md`
-  (`docs/ja/adr/0002-panel-text-size.ja.md`)
-- ADR-0003 — panel layout and minimum size:
-  `docs/en/adr/0003-panel-layout-and-minimum-size.md`
-  (`docs/ja/adr/0003-panel-layout-and-minimum-size.ja.md`)
-- ADR-0004 — detection prior for the user's own languages (`languageHints`):
-  `docs/en/adr/0004-detection-prior-for-own-languages.md`
-  (`docs/ja/adr/0004-detection-prior-for-own-languages.ja.md`)
+- RFP: `docs/en/instant-translate-rfp.md`
+- — panel feedback and failure messages:
+- — panel text size (⌘+ / ⌘− / ⌘0):
+- — panel layout and minimum size:
+- — detection prior for the user's own languages (`languageHints`):
 - Predecessor (archived): https://github.com/nlink-jp/quick-translate

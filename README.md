@@ -1,4 +1,8 @@
-# instant-translate
+# Instant Translate Enhanced
+
+> **This is an unofficial fork of [nlink-jp/instant-translate](https://github.com/nlink-jp/instant-translate).**
+> It adds configurable language-detection restrictions, a **Clear** button, and
+> **Speak** controls for reading translations aloud.
 
 A **lightweight** macOS menu-bar translator built on the OS **Translation
 framework** (on-device). Open a panel from the menu bar, translate, copy — no
@@ -11,7 +15,7 @@ right-click menu › Speech › Start Speaking, which macOS provides.
 
 The successor to [`quick-translate`](https://github.com/nlink-jp/quick-translate)
 (local LLM, now archived): the same menu-bar UX on a different backend. macOS 26+
-(Apple silicon). Signed with Developer ID and notarized.
+(Apple silicon). This fork is distributed as an unsigned, unnotarized app.
 
 ## What it does
 
@@ -31,6 +35,8 @@ The successor to [`quick-translate`](https://github.com/nlink-jp/quick-translate
   input — a few words that would otherwise be taken for a neighbouring language
   ("under" for Swedish, say). If detection still guesses wrong, pin the input
   language with the source picker.
+- **Detection restriction**: Settings can limit automatic detection to selected
+  languages.
 - **Pin the input language**: a source picker in the panel ("Auto" + languages)
   skips detection entirely and always translates as the pinned language — for when
   you know what you're pasting. Resets to Auto on restart.
@@ -45,6 +51,8 @@ The successor to [`quick-translate`](https://github.com/nlink-jp/quick-translate
 - **Global hotkey**: press **⌥⌘T** (rebindable in Settings, or removed with the **×**
   beside it — then open the panel from the menu bar) to open the panel from
   anywhere. On open it can seed the source from your clipboard and translate it.
+- **Clear**: clear the source and translation with one button.
+- **Speak**: read the translation aloud with the macOS speech synthesizer.
 - **Only OS-supported languages**: the pickers list exactly the languages your Mac's
   Translation framework supports; unsupported pairs are reported clearly.
 - **Always says what it's doing**: a status line under the pickers reports every
@@ -78,20 +86,30 @@ needs **no network, no API key, no credentials**.
 
 ## Design notes
 
-- [ADR-0001 — Panel feedback and failure messages](docs/en/adr/0001-panel-feedback-and-failure-messages.md)
-  ([ja](docs/ja/adr/0001-panel-feedback-and-failure-messages.ja.md))
 
 ## Build
 
 ```sh
 make run          # build + run (debug)
 make build        # release binary → .build/release/
-make build-app    # signed .app → dist/
-make package      # build-app + notarize + staple + zip (release)
+make build-app    # unsigned .app → dist/
+make package      # build-app + zip (release)
 make test
 ```
 
 Requires the macOS 26 SDK (recent Xcode / Command Line Tools).
+
+## Homebrew
+
+To install this fork from its Homebrew tap:
+
+```sh
+brew tap anonymousaga/homebrew-tap
+brew install --cask instant-translate-enhanced
+```
+
+The cask installs this fork's unsigned build and is separate from the
+upstream `instant-translate` app.
 
 ## Why Apple Translation (not an LLM)
 

@@ -15,7 +15,7 @@ the result. The successor to [`quick-translate`](https://github.com/nlink-jp/qui
 - **Tests are mandatory** — write them with the implementation. The routing logic
   (`LanguagePolicy`) and settings (`SettingsStore`) are pure/injected and unit-tested.
 - **Never build ad-hoc** — use `make build` / `make build-app`.
-- **Docs in sync** — update `README.md` and `README.ja.md` together.
+- **Docs in sync** — keep the English documentation current.
 - **Small, typed commits** — `feat:`, `fix:`, `test:`, `chore:`, `docs:`, etc.
 - **No secrets / PII** — the app reads only what the user types/pastes; nothing leaves the machine.
 
@@ -31,7 +31,7 @@ make test         # swift test
 Requires the **macOS 26 SDK** (recent Xcode / Command Line Tools) — the
 programmatic Translation API and this app's deployment target are macOS 26.
 
-## Key decisions (see docs/ja/instant-translate-rfp.ja.md)
+## Key decisions
 
 - **Apple Translation, not an LLM**: on-device, lightweight, OS-managed models —
   fixes `quick-translate`'s tens-of-GB load. No network / credentials in the app.
@@ -46,7 +46,7 @@ programmatic Translation API and this app's deployment target are macOS 26.
 - `App.swift` — `@NSApplicationDelegateAdaptor(AppController.self)` + a placeholder `Settings { EmptyView() }` scene (no window).
 - `AppController.swift` — `NSApplicationDelegate`/`ObservableObject`; owns the `NSStatusItem`, the resizable translation `NSPanel` (hosts `PanelView`), and the separate settings `NSWindow`. Show/hide/focus + `openSettings`.
 - `LanguagePolicy.swift` — **pure** target-language routing (local / secondary / auto-swap). Unit-tested.
-- `LanguageDetector.swift` — `NLLanguageRecognizer` detection (→ base subtag) with a prior favouring the local + secondary languages over every known language, Japanese and Chinese excepted (**pure** `hints(preferred:)`, ADR-0004 — never hint only the preferred ones, that restricts; never weight ja/zh, they swallow each other) and a **pure** tie-break (`resolve(hypotheses:preferred:)`). Feeds the policy and the session's explicit source. Unit-tested.
+- `LanguageDetector.swift` — `NLLanguageRecognizer` detection (→ base subtag) with a prior favouring the local + secondary languages over every known language, Japanese and Chinese excepted (**pure** `hints(preferred:)`, — never hint only the preferred ones, that restricts; never weight ja/zh, they swallow each other) and a **pure** tie-break (`resolve(hypotheses:preferred:)`). Feeds the policy and the session's explicit source. Unit-tested.
 - `HotKey.swift` — `HotKeyCombo` (persist/display/Carbon masks, unit-tested) + `GlobalHotKey` (Carbon `RegisterEventHotKey`).
 - `HotKeyRecorder.swift` — click-to-record shortcut control (local `keyDown` monitor), with an × that stores `HotKeyCombo.disabled` (a persisted "no shortcut" — removing the defaults would restore ⌥⌘T).
 - `SettingsStore.swift` — `UserDefaults` keys/defaults + snapshot; builds a `LanguagePolicy`.
@@ -57,8 +57,8 @@ programmatic Translation API and this app's deployment target are macOS 26.
 - `Languages.swift` — curated fallback language list + localized names for the pickers.
 - `LanguageCatalog.swift` — async load of OS-supported languages (`LanguageAvailability`) → `[LanguageOption]` (region-qualified when a base has >1 variant); pickers bind to it.
 - `TextTranslating.swift` — protocol + `EchoTranslator` stub (tests/previews).
-- `TextSize.swift` — **pure** ⌘+ / ⌘− ladder stepping and the effective size (stored preference, else system body size, clamped). Unit-tested. ADR-0002.
-- `PanelMinimumSize.swift` — **pure** panel minimum size from the laid-out sizes `PanelView` reports. Unit-tested. ADR-0003.
+- `TextSize.swift` — **pure** ⌘+ / ⌘− ladder stepping and the effective size (stored preference, else system body size, clamped). Unit-tested..
+- `PanelMinimumSize.swift` — **pure** panel minimum size from the laid-out sizes `PanelView` reports. Unit-tested..
 - `WindowPlacement.swift` — **pure** clamp that moves a window resized in code (panel grown to its minimum, settings fitted to its content) back inside the screen's visible frame. Unit-tested.
 - `PanelView.swift` — the translation panel; owns the real `TranslationSession` via `.translationTask`; fills the panel; focus-on-open; debounced auto-translate. Gear → `openSettings`.
 - `SourceTextView.swift` — the source input: an `NSTextView` (`NSViewRepresentable`) that surfaces IME composition state (`hasMarkedText`) and takes first responder on `focusToken`.
@@ -77,7 +77,7 @@ programmatic Translation API and this app's deployment target are macOS 26.
 - **Text-size shortcuts are bound per arriving form** — `.keyboardShortcut` matches
   modifiers exactly, so enlarge needs `"+"`+⌘⇧ (main-row `+`), `"+"`+⌘ (keypad) and
   `"="`+⌘ (US). A missing binding makes that key beep. `SettingsKey.textSize` stays
-  unregistered (absent = system size; ⌘0 deletes it). ADR-0002.
+  unregistered (absent = system size; ⌘0 deletes it)..
 - **Settings persist, history doesn't**: `SettingsStore` reads `UserDefaults`;
   `SettingsView` binds the same keys via `@AppStorage`.
 - **Signing**: pure SwiftUI/AppKit → no entitlements, Hardened Runtime alone.
@@ -88,7 +88,7 @@ programmatic Translation API and this app's deployment target are macOS 26.
   re-anchored under the status item on each open; focus-on-open is driven by
   `AppController.focusToken` → `PanelView`'s `@FocusState`. `AppController` is also
   the Phase 2 hotkey entry point (`showPanel()`).
-- **The panel's minimum size is measured from its laid-out content** (ADR-0003) —
+- **The panel's minimum size is measured from its laid-out content** () —
   not a constant (it follows the language names) and not `NSHostingView`'s
   `.minSize` (a 0 × 0 proposal text can't answer; `sizingOptions` is `[]`). The
   hosting view sits in a plain container, not as `contentView`, or it resizes the
@@ -131,7 +131,7 @@ programmatic Translation API and this app's deployment target are macOS 26.
   fix it — a separate window is reliable and conventional. The `Settings { EmptyView() }`
   scene is just the required placeholder. Its height is fitted to the content
   (`fitSettingsWindow`, measured inside the scroll view), with the hosting view in a
-  plain container like the panel's (ADR-0003).
+  plain container like the panel's ().
 - **No special permissions / no Accessibility** — selected-text translation was
   descoped, so the app needs no TCC grant (only the OS's language-model download
   consent). The global hotkey uses Carbon `RegisterEventHotKey` (no TCC). Don't add
@@ -145,18 +145,18 @@ programmatic Translation API and this app's deployment target are macOS 26.
   shape. `TranslationFailure.classify` matches on `TranslationError`'s custom `~=`
   (verified to discriminate as an exact 8×8 diagonal) and is the only place allowed
   to touch that type; `message(...)` phrases it, and an unplaced error keeps
-  `failureReason ?? localizedDescription` plus domain/code. ADR-0001.
+  `failureReason ?? localizedDescription` plus domain/code..
 - **Silent states are bugs** — anything that withholds a translation (IME
   composition, undetectable input, armed debounce, source == target echo, model
   download) must set a `TranslationPhase` and get a line in
   `TranslationStatus.display`. All of these previously looked identical to a hang.
   `isTranslating` is derived from `phase`, not stored — don't reintroduce a second
-  source of truth. ADR-0001.
+  source of truth..
 - **The language-model download is prepared explicitly** — `PanelView.run` checks
   `session.isReady` and calls `session.prepareTranslation()` under a `.preparing`
   phase. The OS consent appears either way; this puts it at a labelled moment.
   Note this does *not* loosen the separate rule about the OS **source-language**
-  picker, which the app still works to never trigger. ADR-0001.
+  picker, which the app still works to never trigger..
 - **Cask min-macOS floor is `:tahoe`** — set via `BREW_MACOS_FLOOR := :tahoe` in the
   Makefile (the shared `cask.rb.tmpl` carries a `@MACOS_FLOOR@` placeholder that
   `gen-brew.sh` substitutes; default `:big_sur`). `make brew` now generates the
@@ -165,6 +165,5 @@ programmatic Translation API and this app's deployment target are macOS 26.
 
 ## Design reference
 
-- RFP: `docs/ja/instant-translate-rfp.ja.md` (`docs/en/instant-translate-rfp.md`)
-- ADRs: `docs/{en,ja}/adr/` — 0001 panel feedback and failure messages, 0002 panel text size, 0003 panel layout and minimum size, 0004 detection prior for the user's own languages
+- RFP: `docs/en/instant-translate-rfp.md`
 - Predecessor (archived): https://github.com/nlink-jp/quick-translate
