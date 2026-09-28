@@ -31,7 +31,7 @@ BREW_TAP_DIR ?= $(HOME)/works/anonymousaga/homebrew-tap
 GEN_BREW     ?= scripts/gen-brew.sh
 DIST_DIR     ?= dist
 BREW_NAME    ?= $(BINARY)
-BREW_ZIP     ?= $(DIST_DIR)/$(BREW_NAME)-$(VERSION)-darwin-arm64.zip
+BREW_ZIP     ?= $(DIST_DIR)/$(BREW_NAME)-v$(VERSION)-darwin-arm64.zip
 BREW_MACOS_FLOOR ?= :big_sur
 
 BREW_ENV = BREW_KIND="$(BREW_KIND)" BREW_DESC="$(BREW_DESC)" \

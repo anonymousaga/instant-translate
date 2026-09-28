@@ -111,6 +111,32 @@ brew install --cask instant-translate-enhanced
 The cask installs this fork's unsigned build and is separate from the
 upstream `instant-translate` app.
 
+### Automated releases
+
+Pushing a version tag such as `v1.0.0` runs the GitHub Actions release workflow.
+It builds and tests the unsigned app, publishes the ZIP to the GitHub release,
+and updates `anonymousaga/homebrew-tap`.
+
+The `instant-translate-enhanced` repository needs a repository secret named
+`HOMEBREW_TAP_TOKEN`. The token must be allowed to read and write
+`anonymousaga/homebrew-tap` (a fine-grained token with Contents read/write
+access is sufficient).
+
+Create the tap repository before the first release:
+
+```sh
+git clone https://github.com/anonymousaga/homebrew-tap.git \
+  ~/works/anonymousaga/homebrew-tap
+mkdir -p ~/works/anonymousaga/homebrew-tap/Casks
+```
+
+Then create and push a release tag:
+
+```sh
+git tag v0.4.2
+git push origin v0.4.2
+```
+
 ## Why Apple Translation (not an LLM)
 
 Its predecessor, `quick-translate`, loaded a local LLM (tens of GB) for

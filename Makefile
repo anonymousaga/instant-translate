@@ -47,14 +47,14 @@ build-app: build
 
 ## package: build-app, then zip the unsigned .app for release
 package: build-app
-	@cd "$(DIST_DIR)" && /usr/bin/ditto --norsrc --noextattr -c -k --keepParent "$(APP_NAME).app" "$(NAME)-$(VERSION)-darwin-arm64.zip"
-	@ls -la "$(DIST_DIR)/$(NAME)-$(VERSION)-darwin-arm64.zip"
+	@cd "$(DIST_DIR)" && /usr/bin/ditto --norsrc --noextattr -c -k --keepParent "$(APP_NAME).app" "$(NAME)-v$(VERSION)-darwin-arm64.zip"
+	@ls -la "$(DIST_DIR)/$(NAME)-v$(VERSION)-darwin-arm64.zip"
 
 ## verify-release: verify the unsigned release archive
 verify-release:
-	@test -f "$(DIST_DIR)/$(NAME)-$(VERSION)-darwin-arm64.zip" || { \
-		echo "verify-release: FAIL — release zip missing: $(DIST_DIR)/$(NAME)-$(VERSION)-darwin-arm64.zip"; exit 1; }
-	@scripts/verify-app-zip.sh "$(DIST_DIR)/$(NAME)-$(VERSION)-darwin-arm64.zip"
+	@test -f "$(DIST_DIR)/$(NAME)-v$(VERSION)-darwin-arm64.zip" || { \
+		echo "verify-release: FAIL — release zip missing: $(DIST_DIR)/$(NAME)-v$(VERSION)-darwin-arm64.zip"; exit 1; }
+	@scripts/verify-app-zip.sh "$(DIST_DIR)/$(NAME)-v$(VERSION)-darwin-arm64.zip"
 	@sdk=$$(otool -l "$(APP_BUNDLE)/Contents/MacOS/$(APP_NAME)" | awk '/LC_BUILD_VERSION/{f=1} f && /^ *sdk /{print $$2; exit}'); \
 		test "$$sdk" = "$(MACOS_SDK)" || { \
 			echo "verify-release: FAIL — linked SDK is $$sdk, expected $(MACOS_SDK)."; \
