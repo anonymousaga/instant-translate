@@ -7,8 +7,8 @@
 A lightweight macOS menu-bar app (SwiftUI, `MenuBarExtra`, `LSUIElement`) that
 translates text with the OS **Translation framework** (`TranslationSession`,
 on-device). Open a panel from the menu bar to type/paste text, translate, and copy
-the result. The lightweight sibling of [`quick-translate`](https://github.com/nlink-jp/quick-translate)
-(local LLM) — same UX, different backend, they coexist. macOS 26+, Apple silicon.
+the result. The successor to [`quick-translate`](https://github.com/nlink-jp/quick-translate)
+(local LLM, archived 2026-08-30) — same UX, different backend. macOS 26+, Apple silicon.
 
 ## Non-negotiable rules
 
@@ -167,4 +167,4 @@ programmatic Translation API and this app's deployment target are macOS 26.
 
 - RFP: `docs/ja/instant-translate-rfp.ja.md` (`docs/en/instant-translate-rfp.md`)
 - ADRs: `docs/{en,ja}/adr/` — 0001 panel feedback and failure messages, 0002 panel text size, 0003 panel layout and minimum size, 0004 detection prior for the user's own languages
-- Sibling: https://github.com/nlink-jp/quick-translate
+- Predecessor (archived): https://github.com/nlink-jp/quick-translate

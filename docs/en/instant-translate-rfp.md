@@ -3,6 +3,10 @@
 > Generated: 2026-07-19
 > Status: Draft
 
+> **Positioning update (2026-08-30):** `quick-translate` was archived and instant-translate
+> became its successor, rather than a sibling it coexists with. The references to
+> coexistence below record the decision as it stood on 2026-07-19.
+
 > **Scope update (2026-07-19):** Trigger #3, *selected-text translation* (which would
 > have required Accessibility), was **cancelled** during Phase 2. Consequently the app
 > needs **no special permissions** (only the OS's language-model download consent), and

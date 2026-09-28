@@ -4,8 +4,8 @@
 
 A lightweight macOS menu-bar app (SwiftUI, `MenuBarExtra`, `LSUIElement`) that
 translates text via the OS **Translation framework** (`TranslationSession`,
-on-device). The lightweight sibling of `quick-translate` (local LLM) — same UX,
-different backend. GUI-only, macOS 26+, Apple silicon. Signed + notarized SwiftPM
+on-device). The successor to `quick-translate` (local LLM, archived 2026-08-30) —
+same UX, different backend. GUI-only, macOS 26+, Apple silicon. Signed + notarized SwiftPM
 `.app` (no `.xcodeproj`).
 
 ## Build & test
@@ -321,4 +321,4 @@ ADR-0001.
 - ADR-0004 — detection prior for the user's own languages (`languageHints`):
   `docs/en/adr/0004-detection-prior-for-own-languages.md`
   (`docs/ja/adr/0004-detection-prior-for-own-languages.ja.md`)
-- Sibling: https://github.com/nlink-jp/quick-translate
+- Predecessor (archived): https://github.com/nlink-jp/quick-translate
