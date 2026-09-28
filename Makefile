@@ -1,18 +1,10 @@
-APP_NAME    := InstantTranslate
-NAME        := instant-translate
-BUNDLE_ID   := jp.nlink.instant-translate
+APP_NAME    := Instant Translate Enhanced
+NAME        := instant-translate-enhanced
+BUNDLE_ID   := com.anonymousaga.instant-translate-enhanced
 VERSION     := $(shell git describe --tags --always --dirty 2>/dev/null || echo "0.1.0")
 BUILD_DIR   := .build/release
 DIST_DIR    := dist
 APP_BUNDLE  := $(DIST_DIR)/$(APP_NAME).app
-
-# macOS Developer ID signing / notarization (see nlink-jp/.github CONVENTIONS.md
-# §Code Signing → GUI apps). Pure SwiftUI/AppKit needs no JIT entitlements —
-# Hardened Runtime alone suffices. The app is self-contained (no bundled CLI).
-CODESIGN_IDENTITY ?= Developer ID Application
-NOTARY_PROFILE    ?= nlink-jp-notary
-CODESIGN_SCRIPT := scripts/codesign-darwin-app.sh
-NOTARIZE_SCRIPT := scripts/notarize-darwin-app.sh
 
 # App icon: a 1024x1024 source PNG; build-app generates AppIcon.icns into the
 # bundle's Resources (sips + iconutil). Missing source → app builds without icon.
@@ -39,34 +31,27 @@ build:
 	@test -n "$(MACOS_SDK)" || { echo "Makefile: xcrun could not report the macOS SDK version"; exit 1; }
 	swift build -c release $(SDK_LINK_FLAGS)
 
-## build-app: assemble the signed .app bundle
+## build-app: assemble the unsigned .app bundle
 build-app: build
-	@rm -rf $(APP_BUNDLE)
-	@mkdir -p $(APP_BUNDLE)/Contents/MacOS $(APP_BUNDLE)/Contents/Resources
-	@cp $(BUILD_DIR)/$(APP_NAME) $(APP_BUNDLE)/Contents/MacOS/
+	@rm -rf "$(APP_BUNDLE)"
+	@mkdir -p "$(APP_BUNDLE)/Contents/MacOS" "$(APP_BUNDLE)/Contents/Resources"
+	@cp "$(BUILD_DIR)/InstantTranslate" "$(APP_BUNDLE)/Contents/MacOS/$(APP_NAME)"
 	@sed 's/$${VERSION}/$(VERSION)/g; s/$${BUNDLE_ID}/$(BUNDLE_ID)/g; s/$${APP_NAME}/$(APP_NAME)/g' \
-		Info.plist > $(APP_BUNDLE)/Contents/Info.plist
+		Info.plist > "$(APP_BUNDLE)/Contents/Info.plist"
 	@if [ -f "$(ICON_SRC)" ]; then \
-		scripts/make-icns.sh "$(ICON_SRC)" $(APP_BUNDLE)/Contents/Resources/AppIcon.icns; \
+		scripts/make-icns.sh "$(ICON_SRC)" "$(APP_BUNDLE)/Contents/Resources/AppIcon.icns"; \
 	else \
 		echo "[icon] WARN: $(ICON_SRC) not found — building without an app icon"; \
 	fi
-	@$(CODESIGN_SCRIPT) $(APP_BUNDLE) "$(CODESIGN_IDENTITY)"
 	@echo "Built $(APP_BUNDLE) ($(VERSION))"
 
-## package: build-app, notarize + staple the .app, then zip for release
+## package: build-app, then zip the unsigned .app for release
 package: build-app
-	@$(NOTARIZE_SCRIPT) $(APP_BUNDLE) "$(NOTARY_PROFILE)"
-	@cd $(DIST_DIR) && /usr/bin/ditto --norsrc --noextattr -c -k --keepParent $(APP_NAME).app $(NAME)-$(VERSION)-darwin-arm64.zip
-	@ls -la $(DIST_DIR)/$(NAME)-$(VERSION)-darwin-arm64.zip
+	@cd "$(DIST_DIR)" && /usr/bin/ditto --norsrc --noextattr -c -k --keepParent "$(APP_NAME).app" "$(NAME)-$(VERSION)-darwin-arm64.zip"
+	@ls -la "$(DIST_DIR)/$(NAME)-$(VERSION)-darwin-arm64.zip"
 
-## verify-release: refuse to release an un-notarized build (marker + staple gate)
+## verify-release: verify the unsigned release archive
 verify-release:
-	@test -f "$(APP_BUNDLE).notarized" || { \
-		echo "verify-release: FAIL — $(APP_BUNDLE) has no notarization marker."; \
-		echo "  make package must end with '[notarize-app] ...: Accepted and stapled'. Do not upload."; \
-		exit 1; }
-	@xcrun stapler validate $(APP_BUNDLE)
 	@test -f "$(DIST_DIR)/$(NAME)-$(VERSION)-darwin-arm64.zip" || { \
 		echo "verify-release: FAIL — release zip missing: $(DIST_DIR)/$(NAME)-$(VERSION)-darwin-arm64.zip"; exit 1; }
 	@scripts/verify-app-zip.sh "$(DIST_DIR)/$(NAME)-$(VERSION)-darwin-arm64.zip"
@@ -75,7 +60,7 @@ verify-release:
 			echo "verify-release: FAIL — linked SDK is $$sdk, expected $(MACOS_SDK)."; \
 			echo "  macOS draws an app linked against an old SDK with the previous window chrome."; \
 			exit 1; }
-	@echo "verify-release: OK ($(VERSION) — marker present, ticket stapled, linked against SDK $(MACOS_SDK))"
+	@echo "verify-release: OK ($(VERSION) — unsigned archive, linked against SDK $(MACOS_SDK))"
 
 ## test: run tests
 test:
@@ -90,13 +75,13 @@ clean:
 	rm -rf $(DIST_DIR) .build
 
 # Homebrew tap generation (see scripts/release-brew.mk). After `make package`,
-# `make brew` generates this cask from the built darwin-arm64 zip into the local
-# nlink-jp/homebrew-tap checkout.
+# `make brew` generates this cask from the built darwin-arm64 zip.
 BREW_KIND := cask
 BREW_DESC := Lightweight menu-bar translator using macOS on-device Translation
 BREW_NAME := $(NAME)
 BREW_APP := $(APP_NAME).app
 BREW_BUNDLE_ID := $(BUNDLE_ID)
+BREW_REPO := instant-translate-enhanced
 # macOS 26 Translation API — the cask floor must be :tahoe, not the :big_sur default.
 BREW_MACOS_FLOOR := :tahoe
 include scripts/release-brew.mk

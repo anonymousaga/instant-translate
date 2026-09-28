@@ -9,7 +9,7 @@
 #     BREW_DESC := One-line description of the tool
 #     include scripts/release-brew.mk
 #
-#     # cask (notarized GUI .app):
+#     # cask (GUI .app):
 #     BREW_KIND      := cask
 #     BREW_DESC      := One-line description of the app
 #     BREW_NAME      := $(APP)               # if the repo uses APP, not BINARY
@@ -20,7 +20,7 @@
 #     BREW_BINARY_EXE  := MyTool         #   embedded CLI onto the user's PATH
 #     include scripts/release-brew.mk
 #
-# Then, after `make package` (which produces the signed + notarized zip):
+# Then, after `make package` (which produces the release zip):
 #
 #     make brew          # generate + commit into the tap (+ push if it has a remote)
 #     make brew-print    # render to stdout only (no tap checkout needed)

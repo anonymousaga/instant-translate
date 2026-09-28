@@ -10,11 +10,9 @@
 # - macOS metadata. `ditto -c -k` without --norsrc --noextattr writes each
 #   file's extended attributes into the zip as "._" AppleDouble entries. Unpacked
 #   with a plain `unzip`, they land inside the .app as files, and codesign and
-#   Gatekeeper then refuse the bundle ("a sealed resource is missing or
-#   invalid"). Finder, ditto and Homebrew merge them back, so nothing noticed:
-#   18 of 19 GUI releases carried them (measured 2026-09-27).
-# - The app icon. Signing and notarization pass without one, and a menu-bar app
-#   never shows in the Dock: m5-system-panel v0.1.0 shipped without one.
+#   Finder, ditto and Homebrew merge them back, so the issue can otherwise go
+#   unnoticed.
+# - The app icon. A menu-bar app without one is difficult to identify in Finder.
 #
 # Passes only when the zip has no entry named "._*" at any depth and nothing
 # under "__MACOSX/", and holds exactly one top-level .app whose Info.plist names

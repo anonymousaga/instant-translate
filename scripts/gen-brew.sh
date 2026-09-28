@@ -2,9 +2,8 @@
 # gen-brew.sh — generate this repo's Homebrew formula/cask from its just-built
 # release asset and write it into the local nlink-jp/homebrew-tap checkout.
 #
-# Vendored per-repo alongside codesign-darwin.sh / notarize-darwin.sh (canonical
-# copy lives in nlink-jp/.github templates/). Run as the last step of a release,
-# after `make package` has produced the signed + notarized darwin-arm64 zip.
+# Vendored per-repo alongside the release scripts. Run as the last step of a
+# release, after `make package` has produced the unsigned darwin-arm64 zip.
 #
 # Usage:
 #   gen-brew.sh [--print | --no-push] [--tap-dir DIR] <release-zip>
@@ -36,8 +35,7 @@
 #                       (default: this script's directory)
 #
 # Notes:
-#   - arm64-only, prebuilt: the tap installs the notarized asset as-is so the
-#     Developer ID signature is preserved (verified via `spctl -a`). Never a
+#   - arm64-only, prebuilt: the tap installs the unsigned asset as-is. Never a
 #     source build.
 #   - If the tap has no `origin` remote yet (not published), commit succeeds
 #     and push is skipped with a notice — the same command pushes once a

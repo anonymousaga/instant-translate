@@ -7,7 +7,7 @@ cask "@NAME@" do
   desc "@DESC@"
   homepage "https://github.com/nlink-jp/@REPO@"
 
-  # Developer ID signed + Apple-notarized + stapled .app (Apple Silicon only).
+  # Unsigned .app (Apple Silicon only).
   depends_on arch: :arm64
   depends_on macos: @MACOS_FLOOR@
 
