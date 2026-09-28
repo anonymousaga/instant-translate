@@ -117,7 +117,7 @@ enum TranslationFailure: Equatable {
         case .frameworkInternal:
             return FailureMessage(
                 headline: "The macOS translation service failed.",
-                recovery: "Try again. If it keeps failing, quitting and reopening instant-translate usually clears it.",
+                recovery: "Try again. If it keeps failing, quitting and reopening instant-translate-enhanced usually clears it.",
                 detail: tag)
         case .unknown(let text):
             return FailureMessage(

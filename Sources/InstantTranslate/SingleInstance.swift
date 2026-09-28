@@ -32,6 +32,6 @@ func singleInstanceDecision(
     guard !others.isEmpty else { return .proceed }
     let pids = others.map(String.init).joined(separator: ", ")
     return .exitDuplicate(
-        message: "instant-translate: another instance is already running (pid \(pids)) — exiting"
+        message: "instant-translate-enhanced: another instance is already running (pid \(pids)) — exiting"
     )
 }

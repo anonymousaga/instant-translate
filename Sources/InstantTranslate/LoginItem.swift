@@ -22,7 +22,7 @@ enum LoginItem {
                 break
             }
         } catch {
-            NSLog("instant-translate: failed to update login item: \(error.localizedDescription)")
+            NSLog("instant-translate-enhanced: failed to update login item: \(error.localizedDescription)")
         }
     }
 }

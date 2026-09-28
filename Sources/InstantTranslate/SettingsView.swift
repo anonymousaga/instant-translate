@@ -81,8 +81,8 @@ struct SettingsView: View {
                             HotKeyRecorder(combo: hotKeyBinding)
                         }
                         Text(hotKeyBinding.wrappedValue.isValid
-                             ? "Press this shortcut anywhere to open instant-translate."
-                             : "No shortcut — open instant-translate from its menu bar icon.")
+                             ? "Press this shortcut anywhere to open instant-translate-enhanced."
+                             : "No shortcut — open instant-translate-enhanced from its menu bar icon.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -105,11 +105,12 @@ struct SettingsView: View {
                 }
                 // Settings is where people habitually look for a version number.
                 VStack(spacing: 2) {
-                    Text("nlink-jp instant-translate \(AppInfo.version)")
+                    Link("https://github.com/anonymousaga/instant-translate-enhanced",
+                        destination: URL(string: "https://github.com/anonymousaga/instant-translate-enhanced")!)
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                         .textSelection(.enabled)
-                    Text("Fork by anonymousaga")
+                    Text("instant-translate-enhanced — fork of nlink-jp/instant-translate")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                         .textSelection(.enabled)

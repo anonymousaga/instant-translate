@@ -50,7 +50,7 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = item.button {
             button.image = NSImage(systemSymbolName: "character.bubble",
-                                   accessibilityDescription: "instant-translate")
+                                   accessibilityDescription: "instant-translate-enhanced")
             button.image?.isTemplate = true
             button.target = self
             button.action = #selector(togglePanel)
@@ -200,7 +200,7 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
             contentRect: NSRect(x: 0, y: 0, width: 440, height: 540),
             styleMask: [.titled, .closable],
             backing: .buffered, defer: false)
-        w.title = "instant-translate Settings"
+        w.title = "instant-translate-enhanced Settings"
         w.isReleasedWhenClosed = false
         let host = NSHostingView(rootView:
             SettingsView(onContentHeight: { [weak self] height in

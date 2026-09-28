@@ -40,7 +40,7 @@ struct PanelView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("instant-translate")
+                Text("instant-translate-enhanced")
                     .font(.headline)
                 // The app has no menu bar and no About item, so this is the only place
                 // you can find out which build you're running.
