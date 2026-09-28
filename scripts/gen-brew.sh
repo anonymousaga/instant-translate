@@ -1,6 +1,6 @@
 #!/bin/sh
 # gen-brew.sh — generate this repo's Homebrew formula/cask from its just-built
-# release asset and write it into the local nlink-jp/homebrew-tap checkout.
+# release asset and write it into the local anonymousaga/homebrew-tap checkout.
 #
 # Vendored per-repo alongside the release scripts. Run as the last step of a
 # release, after `make package` has produced the unsigned darwin-arm64 zip.

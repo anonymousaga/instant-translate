@@ -1,8 +1,7 @@
-# release-brew.mk — shared Homebrew tap generation hook (nlink-jp).
+# release-brew.mk — Homebrew tap generation hook.
 #
-# Canonical copy: nlink-jp/.github templates/release-brew.mk. Vendor it into a
-# repo's scripts/ alongside gen-brew.sh + the matching <kind>.rb.tmpl, then in
-# the repo Makefile define a few vars and `include` this fragment:
+# Vendor this file into a repository alongside gen-brew.sh and the matching
+# <kind>.rb.tmpl, then define the variables below in the repository Makefile:
 #
 #     # formula (Go CLI):
 #     BREW_KIND := formula
@@ -28,7 +27,7 @@
 # The package target itself is never modified: this only adds new targets, so
 # the release build stays byte-for-byte the same.
 
-BREW_TAP_DIR ?= $(HOME)/works/nlink-jp/homebrew-tap
+BREW_TAP_DIR ?= $(HOME)/works/anonymousaga/homebrew-tap
 GEN_BREW     ?= scripts/gen-brew.sh
 DIST_DIR     ?= dist
 BREW_NAME    ?= $(BINARY)
