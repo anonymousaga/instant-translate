@@ -56,7 +56,7 @@ jobs:
         run: |
           gh release create "$TAG" \
             "dist/instant-translate-enhanced-v${VERSION}-darwin-arm64.zip" \
-            --title "Instant Translate Enhanced ${VERSION}" \
+            --title "v${VERSION}" \
             --generate-notes
 
       - name: Check Homebrew tap token
