@@ -105,7 +105,7 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
         guard SettingsStore.current().hideOnDeactivate else { return }
         // A short grace period after showing prevents a launch/login focus bounce from
         // hiding the just-opened panel.
-        if Date().timeIntervalSince(lastShownAt) < 0.5 { return }
+        if Date().timeIntervalSince(lastShownAt) < 0.05 { return }
         hidePanel()
     }
 
