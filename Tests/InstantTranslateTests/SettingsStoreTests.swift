@@ -30,6 +30,7 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertTrue(s.autoTranslate)
         XCTAssertTrue(s.clipboardAutoTranslate)
         XCTAssertFalse(s.copyOnTranslate)
+        XCTAssertTrue(s.hideOnDeactivate)
         XCTAssertFalse(s.secondaryLanguage.isEmpty)
     }
 

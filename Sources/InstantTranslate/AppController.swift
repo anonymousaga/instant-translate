@@ -68,6 +68,9 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
         NotificationCenter.default.addObserver(
             self, selector: #selector(defaultsChanged),
             name: UserDefaults.didChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(panelDidResignKey),
+            name: NSWindow.didResignKeyNotification, object: nil)
 
         // Load the OS-supported language set (async) so the pickers are accurate.
         languageCatalog.load()
@@ -83,12 +86,23 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
         hotKey?.register(combo)
     }
 
-    /// Dismiss the translation panel when the app loses focus (click-away behaviour),
-    /// via an explicit orderOut so `isVisible` stays accurate for togglePanel.
+    /// Dismiss the translation panel when the app loses focus (click-away behaviour)
+    /// when enabled, via an explicit orderOut so `isVisible` stays accurate for
+    /// togglePanel.
     ///
     /// A short grace period after showing prevents a launch/login focus bounce from
     /// hiding the panel right after it opens (the "won't open just after launch" bug).
     func applicationDidResignActive(_ notification: Notification) {
+        dismissPanelIfConfigured()
+    }
+
+    @objc private func panelDidResignKey(_ notification: Notification) {
+        guard notification.object as AnyObject? === panel else { return }
+        dismissPanelIfConfigured()
+    }
+
+    private func dismissPanelIfConfigured() {
+        guard SettingsStore.current().hideOnDeactivate else { return }
         // A short grace period after showing prevents a launch/login focus bounce from
         // hiding the just-opened panel.
         if Date().timeIntervalSince(lastShownAt) < 0.5 { return }
@@ -265,7 +279,8 @@ final class AppController: NSObject, NSApplicationDelegate, ObservableObject {
         // NB: do NOT set hidesOnDeactivate — it auto-hides the panel on deactivation
         // WITHOUT clearing `isVisible`, so togglePanel would then see a stale `true`
         // and `orderOut` (a no-op) instead of showing. We dismiss on deactivation
-        // ourselves via applicationDidResignActive (an explicit orderOut).
+        // ourselves via applicationDidResignActive / panelDidResignKey (an explicit
+        // orderOut).
         p.isReleasedWhenClosed = false
         p.animationBehavior = .utilityWindow
         p.standardWindowButton(.closeButton)?.isHidden = true

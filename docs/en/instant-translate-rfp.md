@@ -70,7 +70,7 @@ language-switch controls.
 
 - Settings are persisted in `UserDefaults` and edited via a SwiftUI Settings screen
 - Setting items: secondary locale, auto-swap on/off, hotkey bindings,
-  clipboard-auto-translate on/off, etc.
+  clipboard-auto-translate on/off, hide-on-click-away on/off, etc.
 
 ### External Dependencies
 

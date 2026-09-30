@@ -14,6 +14,8 @@ enum SettingsKey {
     static let clipboardAutoTranslate = "clipboardAutoTranslate"
     /// Automatically copy the translation to the clipboard when it completes.
     static let copyOnTranslate = "copyOnTranslate"
+    /// Hide the panel when the app loses focus after clicking away.
+    static let hideOnDeactivate = "hideOnDeactivate"
     /// Global hotkey that opens the panel — virtual key code + modifier flags.
     static let hotKeyKeyCode = "hotKeyKeyCode"
     static let hotKeyModifiers = "hotKeyModifiers"
@@ -32,6 +34,7 @@ enum SettingsKey {
             autoTranslate: true,
             clipboardAutoTranslate: true,
             copyOnTranslate: false,
+            hideOnDeactivate: true,
             hotKeyKeyCode: Int(HotKeyCombo.default.keyCode),
             hotKeyModifiers: Int(bitPattern: HotKeyCombo.default.modifiers),
             detectionLanguages: ""
@@ -48,6 +51,7 @@ struct SettingsStore: Equatable {
     var autoTranslate: Bool = true
     var clipboardAutoTranslate: Bool
     var copyOnTranslate: Bool
+    var hideOnDeactivate: Bool = true
     var detectionLanguages: String = ""
 
     var detectionLanguageList: [String] {
@@ -66,6 +70,7 @@ struct SettingsStore: Equatable {
             autoTranslate: d.bool(forKey: SettingsKey.autoTranslate),
             clipboardAutoTranslate: d.bool(forKey: SettingsKey.clipboardAutoTranslate),
             copyOnTranslate: d.bool(forKey: SettingsKey.copyOnTranslate),
+            hideOnDeactivate: d.bool(forKey: SettingsKey.hideOnDeactivate),
             detectionLanguages: d.string(forKey: SettingsKey.detectionLanguages) ?? ""
         )
     }

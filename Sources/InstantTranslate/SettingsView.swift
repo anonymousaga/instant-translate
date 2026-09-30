@@ -18,6 +18,7 @@ struct SettingsView: View {
     @AppStorage(SettingsKey.autoTranslate) private var autoTranslate = true
     @AppStorage(SettingsKey.clipboardAutoTranslate) private var clipboardAutoTranslate = true
     @AppStorage(SettingsKey.copyOnTranslate) private var copyOnTranslate = false
+    @AppStorage(SettingsKey.hideOnDeactivate) private var hideOnDeactivate = true
     @AppStorage(SettingsKey.hotKeyKeyCode) private var hotKeyKeyCode = Int(HotKeyCombo.default.keyCode)
     @AppStorage(SettingsKey.hotKeyModifiers) private var hotKeyModifiers = Int(bitPattern: HotKeyCombo.default.modifiers)
     @AppStorage(SettingsKey.detectionLanguages) private var detectionLanguages = ""
@@ -100,6 +101,7 @@ struct SettingsView: View {
                         Toggle("Translate automatically as you type", isOn: $autoTranslate)
                         Toggle("Seed from clipboard when opened by hotkey", isOn: $clipboardAutoTranslate)
                         Toggle("Copy result automatically", isOn: $copyOnTranslate)
+                        Toggle("Hide panel when clicking away", isOn: $hideOnDeactivate)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
